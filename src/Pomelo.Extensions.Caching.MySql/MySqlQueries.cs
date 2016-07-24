@@ -17,10 +17,10 @@ namespace Pomelo.Extensions.Caching.MySql
         "UPDATE {0} " +
         "SET ExpiresAtTime = " +
             "(CASE " +
-                "WHEN DATEDIFF(SECOND, @UtcNow, AbsoluteExpiration) <= SlidingExpirationInSeconds " +
+                "WHEN DATEDIFF(SECOND, @UtcNow) <= SlidingExpirationInSeconds " +
                 "THEN AbsoluteExpiration " +
                 "ELSE " +
-                "DATEADD(SECOND, SlidingExpirationInSeconds, @UtcNow) " +
+                "DATE_ADD(SECOND,INTERVAL @UtcNow SECONDS) " +
             "END) " +
         "WHERE Id = @Id " +
         "AND @UtcNow <= ExpiresAtTime " +
@@ -32,13 +32,13 @@ namespace Pomelo.Extensions.Caching.MySql
             "FROM {0} WHERE Id = @Id AND @UtcNow <= ExpiresAtTime;";
 
         private const string SetCacheItemFormat =
-            "DECLARE @ExpiresAtTime DATETIMEOFFSET; " +
+            "DECLARE @ExpiresAtTime DATETIME; " +
             "SET @ExpiresAtTime = " +
             "(CASE " +
                     "WHEN (@SlidingExpirationInSeconds IS NUll) " +
                     "THEN @AbsoluteExpiration " +
                     "ELSE " +
-                    "DATEADD(SECOND, Convert(bigint, @SlidingExpirationInSeconds), @UtcNow) " +
+                    "DATE_ADD(SECOND,INTERVAL @UtcNow SECONDS) " +
             "END);" +
             "UPDATE {0} SET Value = @Value, ExpiresAtTime = @ExpiresAtTime," +
             "SlidingExpirationInSeconds = @SlidingExpirationInSeconds, AbsoluteExpiration = @AbsoluteExpiration " +
