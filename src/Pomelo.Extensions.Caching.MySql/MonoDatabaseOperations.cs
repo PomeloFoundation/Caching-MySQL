@@ -10,226 +10,238 @@ using Microsoft.Extensions.Internal;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    internal class MonoDatabaseOperations : DatabaseOperations
-    {
-        public MonoDatabaseOperations(
-            string connectionString, string schemaName, string tableName, ISystemClock systemClock)
-            : base(connectionString, schemaName, tableName, systemClock)
-        {
-        }
+	internal class MonoDatabaseOperations : DatabaseOperations
+	{
+		public MonoDatabaseOperations(
+			string connectionString, string schemaName, string tableName, ISystemClock systemClock)
+			: base(connectionString, schemaName, tableName, systemClock)
+		{
+		}
 
-        protected override byte[] GetCacheItem(string key, bool includeValue)
-        {
-            var utcNow = SystemClock.UtcNow;
+		protected override byte[] GetCacheItem(string key, bool includeValue)
+		{
+			var utcNow = SystemClock.UtcNow;
 
-            string query;
-            if (includeValue)
-            {
-                query = MySqlQueries.GetCacheItem;
-            }
-            else
-            {
-                query = MySqlQueries.GetCacheItemWithoutValue;
-            }
+			string query;
+			if (includeValue)
+			{
+				query = MySqlQueries.GetCacheItem;
+			}
+			else
+			{
+				query = MySqlQueries.GetCacheItemWithoutValue;
+			}
 
-            byte[] value = null;
-            TimeSpan? slidingExpiration = null;
-            DateTimeOffset? absoluteExpiration = null;
-            DateTimeOffset expirationTime;
-            using (var connection = new MySqlConnection(ConnectionString))
-            {
-                var command = new MySqlCommand(query, connection);
-                command.Parameters
-                    .AddCacheItemId(key)
-                    .AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+			byte[] value = null;
+			TimeSpan? slidingExpiration = null;
+			DateTimeOffset? absoluteExpiration = null;
+			DateTimeOffset expirationTime;
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var command = new MySqlCommand(query, connection))
+				{
+					command.Parameters
+						.AddCacheItemId(key)
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-                connection.Open();
+					connection.Open();
 
-                var reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult);
+					using (var reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+					{
+						if (reader.Read())
+						{
+							var id = reader.GetString(Columns.Indexes.CacheItemIdIndex);
 
-                if (reader.Read())
-                {
-                    var id = reader.GetString(Columns.Indexes.CacheItemIdIndex);
+							expirationTime = DateTimeOffset.Parse(reader[Columns.Indexes.ExpiresAtTimeIndex].ToString());
 
-                    expirationTime = DateTimeOffset.Parse(reader[Columns.Indexes.ExpiresAtTimeIndex].ToString());
+							if (!reader.IsDBNull(Columns.Indexes.SlidingExpirationInSecondsIndex))
+							{
+								slidingExpiration = TimeSpan.FromSeconds(
+									reader.GetInt64(Columns.Indexes.SlidingExpirationInSecondsIndex));
+							}
 
-                    if (!reader.IsDBNull(Columns.Indexes.SlidingExpirationInSecondsIndex))
-                    {
-                        slidingExpiration = TimeSpan.FromSeconds(
-                            reader.GetInt64(Columns.Indexes.SlidingExpirationInSecondsIndex));
-                    }
+							if (!reader.IsDBNull(Columns.Indexes.AbsoluteExpirationIndex))
+							{
+								absoluteExpiration = DateTimeOffset.Parse(
+									reader[Columns.Indexes.AbsoluteExpirationIndex].ToString());
+							}
 
-                    if (!reader.IsDBNull(Columns.Indexes.AbsoluteExpirationIndex))
-                    {
-                        absoluteExpiration = DateTimeOffset.Parse(
-                            reader[Columns.Indexes.AbsoluteExpirationIndex].ToString());
-                    }
+							if (includeValue)
+							{
+								value = (byte[])reader[Columns.Indexes.CacheItemValueIndex];
+							}
+						}
+						else
+						{
+							return null;
+						}
+					}
+				}
+			}
 
-                    if (includeValue)
-                    {
-                        value = (byte[])reader[Columns.Indexes.CacheItemValueIndex];
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
+			return value;
+		}
 
-            return value;
-        }
+		protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
+		{
+			var utcNow = SystemClock.UtcNow;
 
-        protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
-        {
-            var utcNow = SystemClock.UtcNow;
+			string query;
+			if (includeValue)
+			{
+				query = MySqlQueries.GetCacheItem;
+			}
+			else
+			{
+				query = MySqlQueries.GetCacheItemWithoutValue;
+			}
 
-            string query;
-            if (includeValue)
-            {
-                query = MySqlQueries.GetCacheItem;
-            }
-            else
-            {
-                query = MySqlQueries.GetCacheItemWithoutValue;
-            }
+			byte[] value = null;
+			TimeSpan? slidingExpiration = null;
+			DateTimeOffset? absoluteExpiration = null;
+			DateTimeOffset expirationTime;
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var command = new MySqlCommand(MySqlQueries.GetCacheItem, connection))
+				{
+					command.Parameters
+						.AddCacheItemId(key)
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-            byte[] value = null;
-            TimeSpan? slidingExpiration = null;
-            DateTimeOffset? absoluteExpiration = null;
-            DateTimeOffset expirationTime;
-            using (var connection = new MySqlConnection(ConnectionString))
-            {
-                var command = new MySqlCommand(MySqlQueries.GetCacheItem, connection);
-                command.Parameters
-                    .AddCacheItemId(key)
-                    .AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+					await connection.OpenAsync();
 
-                await connection.OpenAsync();
+					using (var reader = await command.ExecuteReaderAsync(
+						CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+					{
+						if (await reader.ReadAsync())
+						{
+							var id = reader.GetString(Columns.Indexes.CacheItemIdIndex);
 
-                var reader = await command.ExecuteReaderAsync(
-                    CommandBehavior.SingleRow | CommandBehavior.SingleResult);
+							expirationTime = DateTimeOffset.Parse(reader[Columns.Indexes.ExpiresAtTimeIndex].ToString());
 
-                if (await reader.ReadAsync())
-                {
-                    var id = reader.GetString(Columns.Indexes.CacheItemIdIndex);
+							if (!await reader.IsDBNullAsync(Columns.Indexes.SlidingExpirationInSecondsIndex))
+							{
+								slidingExpiration = TimeSpan.FromSeconds(
+									Convert.ToInt64(reader[Columns.Indexes.SlidingExpirationInSecondsIndex].ToString()));
+							}
 
-                    expirationTime = DateTimeOffset.Parse(reader[Columns.Indexes.ExpiresAtTimeIndex].ToString());
+							if (!await reader.IsDBNullAsync(Columns.Indexes.AbsoluteExpirationIndex))
+							{
+								absoluteExpiration = DateTimeOffset.Parse(
+									reader[Columns.Indexes.AbsoluteExpirationIndex].ToString());
+							}
 
-                    if (!await reader.IsDBNullAsync(Columns.Indexes.SlidingExpirationInSecondsIndex))
-                    {
-                        slidingExpiration = TimeSpan.FromSeconds(
-                            Convert.ToInt64(reader[Columns.Indexes.SlidingExpirationInSecondsIndex].ToString()));
-                    }
+							if (includeValue)
+							{
+								value = (byte[])reader[Columns.Indexes.CacheItemValueIndex];
+							}
+						}
+						else
+						{
+							return null;
+						}
+					}
+				}
+			}
 
-                    if (!await reader.IsDBNullAsync(Columns.Indexes.AbsoluteExpirationIndex))
-                    {
-                        absoluteExpiration = DateTimeOffset.Parse(
-                            reader[Columns.Indexes.AbsoluteExpirationIndex].ToString());
-                    }
+			return value;
+		}
 
-                    if (includeValue)
-                    {
-                        value = (byte[])reader[Columns.Indexes.CacheItemValueIndex];
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
+		public override void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options)
+		{
+			var utcNow = SystemClock.UtcNow;
 
-            return value;
-        }
+			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
+			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-        public override void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options)
-        {
-            var utcNow = SystemClock.UtcNow;
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
+				{
+					upsertCommand.Parameters
+						.AddCacheItemId(key)
+						.AddCacheItemValue(value)
+						.AddSlidingExpirationInSeconds(options.SlidingExpiration)
+						.AddAbsoluteExpirationMono(absoluteExpiration)
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-            var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
-            ValidateOptions(options.SlidingExpiration, absoluteExpiration);
+					connection.Open();
 
-            using (var connection = new MySqlConnection(ConnectionString))
-            {
-                var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection);
-                upsertCommand.Parameters
-                    .AddCacheItemId(key)
-                    .AddCacheItemValue(value)
-                    .AddSlidingExpirationInSeconds(options.SlidingExpiration)
-                    .AddAbsoluteExpirationMono(absoluteExpiration)
-                    .AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+					try
+					{
+						upsertCommand.ExecuteNonQuery();
+					}
+					catch (MySqlException ex)
+					{
+						if (IsDuplicateKeyException(ex))
+						{
+							// There is a possibility that multiple requests can try to add the same item to the cache, in
+							// which case we receive a 'duplicate key' exception on the primary key column.
+						}
+						else
+						{
+							throw;
+						}
+					}
+				}
+			}
+		}
 
-                connection.Open();
+		public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
+		{
+			var utcNow = SystemClock.UtcNow;
 
-                try
-                {
-                    upsertCommand.ExecuteNonQuery();
-                }
-                catch (MySqlException ex)
-                {
-                    if (IsDuplicateKeyException(ex))
-                    {
-                        // There is a possibility that multiple requests can try to add the same item to the cache, in
-                        // which case we receive a 'duplicate key' exception on the primary key column.
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-        }
+			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
+			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-        public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
-        {
-            var utcNow = SystemClock.UtcNow;
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
+				{
+					upsertCommand.Parameters
+						.AddCacheItemId(key)
+						.AddCacheItemValue(value)
+						.AddSlidingExpirationInSeconds(options.SlidingExpiration)
+						.AddAbsoluteExpirationMono(absoluteExpiration)
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-            var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
-            ValidateOptions(options.SlidingExpiration, absoluteExpiration);
+					await connection.OpenAsync();
 
-            using (var connection = new MySqlConnection(ConnectionString))
-            {
-                var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection);
-                upsertCommand.Parameters
-                    .AddCacheItemId(key)
-                    .AddCacheItemValue(value)
-                    .AddSlidingExpirationInSeconds(options.SlidingExpiration)
-                    .AddAbsoluteExpirationMono(absoluteExpiration)
-                    .AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+					try
+					{
+						await upsertCommand.ExecuteNonQueryAsync();
+					}
+					catch (MySqlException ex)
+					{
+						if (IsDuplicateKeyException(ex))
+						{
+							// There is a possibility that multiple requests can try to add the same item to the cache, in
+							// which case we receive a 'duplicate key' exception on the primary key column.
+						}
+						else
+						{
+							throw;
+						}
+					}
+				}
+			}
+		}
 
-                await connection.OpenAsync();
+		public override void DeleteExpiredCacheItems()
+		{
+			var utcNow = SystemClock.UtcNow;
 
-                try
-                {
-                    await upsertCommand.ExecuteNonQueryAsync();
-                }
-                catch (MySqlException ex)
-                {
-                    if (IsDuplicateKeyException(ex))
-                    {
-                        // There is a possibility that multiple requests can try to add the same item to the cache, in
-                        // which case we receive a 'duplicate key' exception on the primary key column.
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-            }
-        }
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
+				{
+					command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-        public override void DeleteExpiredCacheItems()
-        {
-            var utcNow = SystemClock.UtcNow;
+					connection.Open();
 
-            using (var connection = new MySqlConnection(ConnectionString))
-            {
-                var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection);
-                command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
-
-                connection.Open();
-
-                var effectedRowCount = command.ExecuteNonQuery();
-            }
-        }
-    }
+					var effectedRowCount = command.ExecuteNonQuery();
+				}
+			}
+		}
+	}
 }
