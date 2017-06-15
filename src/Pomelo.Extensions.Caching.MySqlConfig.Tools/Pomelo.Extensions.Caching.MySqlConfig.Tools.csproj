@@ -26,9 +26,9 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE;NETCOREAPP1_0;NETCOREAPP1_0</DefineConstants>
-    <OutputPath>bin\Debug\netcoreapp1.0\</OutputPath>
-    <DocumentationFile>obj\Debug\netcoreapp1.0\dotnet-mysql-cache.xml</DocumentationFile>
+    <DefineConstants>TRACE;DEBUG;NETCOREAPP1_0</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>obj\Debug\dotnet-mysql-cache.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

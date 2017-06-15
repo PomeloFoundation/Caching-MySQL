@@ -212,9 +212,9 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 
 			byte[] value = null;
-			TimeSpan? slidingExpiration = null;
-			DateTimeOffset? absoluteExpiration = null;
-			DateTimeOffset expirationTime;
+			//TimeSpan? slidingExpiration = null;
+			//DateTimeOffset? absoluteExpiration = null;
+			//DateTimeOffset expirationTime;
 			using (var connection = new MySqlConnection(ConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
@@ -230,7 +230,7 @@ namespace Pomelo.Extensions.Caching.MySql
 					{
 						if (reader.Read())
 						{
-							var id = reader.GetFieldValue<string>(Columns.Indexes.CacheItemIdIndex);
+							/*var id = reader.GetFieldValue<string>(Columns.Indexes.CacheItemIdIndex);
 
 							expirationTime = reader.GetFieldValue<DateTime>(Columns.Indexes.ExpiresAtTimeIndex);
 
@@ -244,7 +244,7 @@ namespace Pomelo.Extensions.Caching.MySql
 							{
 								absoluteExpiration = reader.GetFieldValue<DateTimeOffset>(
 									Columns.Indexes.AbsoluteExpirationIndex);
-							}
+							}*/
 
 							if (includeValue)
 							{
@@ -277,9 +277,9 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 
 			byte[] value = null;
-			TimeSpan? slidingExpiration = null;
-			DateTimeOffset? absoluteExpiration = null;
-			DateTimeOffset expirationTime;
+			//TimeSpan? slidingExpiration = null;
+			//DateTime? absoluteExpiration = null;
+			//DateTime expirationTime;
 			using (var connection = new MySqlConnection(ConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
@@ -296,9 +296,9 @@ namespace Pomelo.Extensions.Caching.MySql
 
 						if (await reader.ReadAsync())
 						{
-							var id = await reader.GetFieldValueAsync<string>(Columns.Indexes.CacheItemIdIndex);
+							/*var id = await reader.GetFieldValueAsync<string>(Columns.Indexes.CacheItemIdIndex);
 
-							expirationTime = await reader.GetFieldValueAsync<DateTimeOffset>(
+							expirationTime = await reader.GetFieldValueAsync<DateTime>(
 								Columns.Indexes.ExpiresAtTimeIndex);
 
 							if (!await reader.IsDBNullAsync(Columns.Indexes.SlidingExpirationInSecondsIndex))
@@ -309,9 +309,9 @@ namespace Pomelo.Extensions.Caching.MySql
 
 							if (!await reader.IsDBNullAsync(Columns.Indexes.AbsoluteExpirationIndex))
 							{
-								absoluteExpiration = await reader.GetFieldValueAsync<DateTimeOffset>(
+								absoluteExpiration = await reader.GetFieldValueAsync<DateTime>(
 									Columns.Indexes.AbsoluteExpirationIndex);
-							}
+							}*/
 
 							if (includeValue)
 							{
