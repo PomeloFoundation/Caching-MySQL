@@ -12,7 +12,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 	public class Program : IDisposable
 	{
 		private string _connectionString = null;
-		private string _schemaName = null;
+		private string _databaseName = null;
 		private string _tableName = null;
 
 		private LoggerFactory _loggerFactory;
@@ -52,14 +52,14 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					var connectionStringArg = command.Argument(
 						"[connectionString]",
 						"The connection string to connect to the database.");
-					var schemaNameArg = command.Argument("[schemaName]", "Name of the table schema.");
+					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
 					command.OnExecute(() =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
-						|| string.IsNullOrEmpty(schemaNameArg.Value)
+						|| string.IsNullOrEmpty(databaseNameArg.Value)
 						|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							_logger.LogWarning("Invalid input");
@@ -68,7 +68,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						}
 
 						_connectionString = connectionStringArg.Value;
-						_schemaName = schemaNameArg.Value;
+						_databaseName = databaseNameArg.Value;
 						_tableName = tableNameArg.Value;
 
 						return CreateTableAndIndexes();
@@ -99,7 +99,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			{
 				connection.Open();
 
-				var sqlQueries = new MySqlQueries(_schemaName, _tableName);
+				var sqlQueries = new MySqlQueries(_databaseName, _tableName);
 				using (var command = new MySqlCommand(sqlQueries.TableInfo, connection))
 				{
 					using (var reader = command.ExecuteReader(CommandBehavior.SingleRow))
@@ -107,7 +107,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						if (reader.Read())
 						{
 							_logger.LogWarning(
-								$"Table with schema '{_schemaName}' and name '{_tableName}' already exists. " +
+								$"Table '{_tableName}' from database '{_databaseName}' already exists. " +
 								"Provide a different table name and try again.");
 							return 1;
 						}

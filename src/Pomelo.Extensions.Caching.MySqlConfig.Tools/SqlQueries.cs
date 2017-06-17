@@ -30,24 +30,24 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			 "WHERE TABLE_SCHEMA = '{0}' " +
 			 "AND TABLE_NAME = '{1}'";
 
-		public MySqlQueries(string schemaName, string tableName)
+		public MySqlQueries(string databaseName, string tableName)
 		{
-			if (string.IsNullOrEmpty(schemaName))
+			if (string.IsNullOrEmpty(databaseName))
 			{
-				throw new ArgumentException("Schema name cannot be empty or null");
+				throw new ArgumentException("Database name cannot be empty or null");
 			}
 			if (string.IsNullOrEmpty(tableName))
 			{
 				throw new ArgumentException("Table name cannot be empty or null");
 			}
 
-			var tableNameWithSchema = string.Format(
-				"{1}", DelimitIdentifier(schemaName), DelimitIdentifier(tableName));
-			CreateTable = string.Format(CreateTableFormat, tableNameWithSchema);
+			var tableNameWithDatabase = string.Format(
+				"{1}", DelimitIdentifier(databaseName), DelimitIdentifier(tableName));
+			CreateTable = string.Format(CreateTableFormat, tableNameWithDatabase);
 			CreateNonClusteredIndexOnExpirationTime = string.Format(
 				CreateNonClusteredIndexOnExpirationTimeFormat,
-				tableNameWithSchema);
-			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(schemaName), EscapeLiteral(tableName));
+				tableNameWithDatabase);
+			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(databaseName), EscapeLiteral(tableName));
 		}
 
 		public string CreateTable { get; }
