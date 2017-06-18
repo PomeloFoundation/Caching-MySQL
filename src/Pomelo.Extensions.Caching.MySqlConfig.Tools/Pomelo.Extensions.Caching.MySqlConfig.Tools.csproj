@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>dotnet-mysql-cache</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+	<PublicSign>false</PublicSign>
     <PackageId>Pomelo.Extensions.Caching.MySqlConfig.Tools</PackageId>
     <PackageTags>cache;distributedcache;mysql</PackageTags>
     <RepositoryType>git</RepositoryType>
