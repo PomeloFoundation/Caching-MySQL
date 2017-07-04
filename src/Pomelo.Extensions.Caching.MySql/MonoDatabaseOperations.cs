@@ -7,6 +7,7 @@ using Pomelo.Data.MySql;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
+using System.Threading;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
@@ -82,7 +83,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			return value;
 		}
 
-		protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
+		protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue, CancellationToken token = default(CancellationToken))
 		{
 			var utcNow = SystemClock.UtcNow;
 
@@ -95,6 +96,8 @@ namespace Pomelo.Extensions.Caching.MySql
 			{
 				query = MySqlQueries.GetCacheItemWithoutValue;
 			}
+
+			token.ThrowIfCancellationRequested();
 
 			byte[] value = null;
 			//TimeSpan? slidingExpiration = null;
@@ -187,9 +190,11 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
+		public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
 		{
 			var utcNow = SystemClock.UtcNow;
+
+			token.ThrowIfCancellationRequested();
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);

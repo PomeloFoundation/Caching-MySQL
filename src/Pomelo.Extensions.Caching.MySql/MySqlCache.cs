@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using System.Threading;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
@@ -99,12 +100,14 @@ namespace Pomelo.Extensions.Caching.MySql
             return value;
         }
 
-        public async Task<byte[]> GetAsync(string key)
+        public async Task<byte[]> GetAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
+			token.ThrowIfCancellationRequested();
 
             var value = await _dbOperations.GetCacheItemAsync(key);
 
@@ -125,12 +128,14 @@ namespace Pomelo.Extensions.Caching.MySql
             ScanForExpiredItemsIfRequired();
         }
 
-        public async Task RefreshAsync(string key)
+        public async Task RefreshAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
+			token.ThrowIfCancellationRequested();
 
             await _dbOperations.RefreshCacheItemAsync(key);
 
@@ -149,12 +154,14 @@ namespace Pomelo.Extensions.Caching.MySql
             ScanForExpiredItemsIfRequired();
         }
 
-        public async Task RemoveAsync(string key)
+        public async Task RemoveAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
+
+			token.ThrowIfCancellationRequested();
 
             await _dbOperations.DeleteCacheItemAsync(key);
 
@@ -188,7 +195,8 @@ namespace Pomelo.Extensions.Caching.MySql
         public async Task SetAsync(
             string key,
             byte[] value,
-            DistributedCacheEntryOptions options)
+            DistributedCacheEntryOptions options,
+			CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
@@ -204,6 +212,8 @@ namespace Pomelo.Extensions.Caching.MySql
             {
                 throw new ArgumentNullException(nameof(options));
             }
+
+			token.ThrowIfCancellationRequested();
 
             GetOptions(ref options);
 
