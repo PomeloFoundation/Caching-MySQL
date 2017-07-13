@@ -109,7 +109,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 			token.ThrowIfCancellationRequested();
 
-            var value = await _dbOperations.GetCacheItemAsync(key);
+            var value = await _dbOperations.GetCacheItemAsync(key, token: token);
 
             ScanForExpiredItemsIfRequired();
 
@@ -137,7 +137,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 			token.ThrowIfCancellationRequested();
 
-            await _dbOperations.RefreshCacheItemAsync(key);
+            await _dbOperations.RefreshCacheItemAsync(key, token: token);
 
             ScanForExpiredItemsIfRequired();
         }
@@ -163,7 +163,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 			token.ThrowIfCancellationRequested();
 
-            await _dbOperations.DeleteCacheItemAsync(key);
+            await _dbOperations.DeleteCacheItemAsync(key, token: token);
 
             ScanForExpiredItemsIfRequired();
         }
@@ -217,7 +217,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             GetOptions(ref options);
 
-            await _dbOperations.SetCacheItemAsync(key, value, options);
+            await _dbOperations.SetCacheItemAsync(key, value, options, token);
 
             ScanForExpiredItemsIfRequired();
         }
