@@ -7,7 +7,10 @@ using Pomelo.Data.MySql;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    internal static class MySqlParameterCollectionExtensions
+	/// <summary>
+	/// TODO: make this class internal again
+	/// </summary>
+	public static class MySqlParameterCollectionExtensions
     {
         // For all values where the length is less than the below value, try setting the size of the
         // parameter for better performance.
@@ -15,7 +18,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
         // Maximum size of a primary key column is 900 bytes (898 bytes from the key + 2 additional bytes required by
         // the MySql Server).
-        public const int CacheItemIdColumnWidth = 449;
+        public const int CacheItemIdColumnWidth = 255;
 
         public static MySqlParameterCollection AddCacheItemId(this MySqlParameterCollection parameters, string value)
         {

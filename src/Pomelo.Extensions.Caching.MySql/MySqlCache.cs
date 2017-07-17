@@ -178,7 +178,7 @@ namespace Pomelo.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(options));
             }
 
-            GetOptions(ref options);
+            //GetOptions(ref options);
 
             _dbOperations.SetCacheItem(key, value, options);
 
@@ -205,7 +205,7 @@ namespace Pomelo.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(options));
             }
 
-            GetOptions(ref options);
+            //GetOptions(ref options);
 
             await _dbOperations.SetCacheItemAsync(key, value, options);
 

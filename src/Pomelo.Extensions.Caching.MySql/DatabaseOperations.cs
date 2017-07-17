@@ -100,7 +100,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public virtual void DeleteExpiredCacheItems()
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow.UtcDateTime;
 
 			using (var connection = new MySqlConnection(ConnectionString))
 			{
@@ -117,11 +117,11 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public virtual void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow.UtcDateTime;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
-			var _absoluteExpiration = absoluteExpiration?.DateTime;
+			var _absoluteExpiration = absoluteExpiration?.UtcDateTime;
 
 			using (var connection = new MySqlConnection(ConnectionString))
 			{
@@ -158,7 +158,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow.UtcDateTime;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
@@ -199,7 +199,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected virtual byte[] GetCacheItem(string key, bool includeValue)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow.UtcDateTime;
 
 			string query;
 			if (includeValue)
@@ -264,7 +264,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow.UtcDateTime;
 
 			string query;
 			if (includeValue)
