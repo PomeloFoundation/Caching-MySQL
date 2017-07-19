@@ -14,37 +14,14 @@ using Xunit;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
 {
-	public class MySqlCacheWithDatabaseTest : IDisposable
+	public class MySqlCacheWithDatabaseTest : IClassFixture<DatabaseOptionsFixture>, IDisposable
 	{
-		private const string ConnectionStringKey = "ConnectionString";
-		private const string SchemaNameKey = "SchemaName";
-		private const string TableNameKey = "TableName";
+		private DatabaseOptionsFixture _databaseOptionsFixture;
 
-		private readonly string _tableName;
-		private readonly string _schemaName;
-		private readonly string _connectionString;
-
-		public MySqlCacheWithDatabaseTest()
+		public MySqlCacheWithDatabaseTest(DatabaseOptionsFixture databaseOptionsFixture)
 		{
-			// TODO: Figure how to use config.json which requires resolving IApplicationEnvironment which currently
-			// fails.
-
-			var memoryConfigurationData = new Dictionary<string, string>
-			{
-				{ ConnectionStringKey, "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True" },
-				{ SchemaNameKey, "SessionTest" },
-				{ TableNameKey, "CacheTest" },
-			};
-
-			var configurationBuilder = new ConfigurationBuilder();
-			configurationBuilder
-				.AddInMemoryCollection(memoryConfigurationData)
-				.AddEnvironmentVariables();
-
-			var configuration = configurationBuilder.Build();
-			_tableName = configuration[TableNameKey];
-			_schemaName = configuration[SchemaNameKey];
-			_connectionString = configuration[ConnectionStringKey];
+			_databaseOptionsFixture = databaseOptionsFixture;
+			_databaseOptionsFixture.FinalCleanup = ClearAllDatabaseEntriesAsync;
 		}
 
 		[Fact]
@@ -600,9 +577,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			var options = new MySqlCacheOptions()
 			{
-				ConnectionString = _connectionString,
-				SchemaName = _schemaName,
-				TableName = _tableName,
+				ConnectionString = _databaseOptionsFixture.ConnectionString,
+				SchemaName = _databaseOptionsFixture.SchemaName,
+				TableName = _databaseOptionsFixture.TableName,
 				SystemClock = testClock ?? new TestClock(),
 				ExpiredItemsDeletionInterval = TimeSpan.FromHours(2)
 			};
@@ -630,11 +607,11 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private async Task<CacheItemInfo> GetCacheItemFromDatabaseAsync(string key)
 		{
-			using (var connection = new MySqlConnection(_connectionString))
+			using (var connection = new MySqlConnection(_databaseOptionsFixture.ConnectionString))
 			{
 				var command = new MySqlCommand(
 					$"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
-					$"FROM {_tableName} WHERE Id = @Id",
+					$"FROM {_databaseOptionsFixture.TableName} WHERE Id = @Id",
 					connection);
 				command.Parameters.AddWithValue("Id", key);
 
@@ -674,9 +651,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private async Task ClearAllDatabaseEntriesAsync()
 		{
-			using (var connection = new MySqlConnection(_connectionString))
+			using (var connection = new MySqlConnection(_databaseOptionsFixture.ConnectionString))
 			{
-				using (var command = new MySqlCommand($"DELETE FROM {_tableName}", connection))
+				using (var command = new MySqlCommand($"DELETE FROM {_databaseOptionsFixture.TableName}", connection))
 				{
 					await connection.OpenAsync();
 

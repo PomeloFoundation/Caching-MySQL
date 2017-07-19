@@ -11,7 +11,8 @@
 
   <ItemGroup>
     <None Update="config.json">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <!--<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>-->
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

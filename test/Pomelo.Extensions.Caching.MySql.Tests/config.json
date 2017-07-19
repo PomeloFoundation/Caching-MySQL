@@ -1,5 +1,5 @@
 ﻿{
 	"ConnectionString": "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True",
-	"SchemaName": "",
+	"SchemaName": "SessionTest",
 	"TableName": "CacheTest"
 }
