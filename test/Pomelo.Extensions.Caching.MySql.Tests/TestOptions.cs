@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Options;
-using Pomelo.Extensions.Caching.MySql;
 
-namespace Microsoft.Extensions.Caching.SqlServer
+namespace Pomelo.Extensions.Caching.MySql.Tests
 {
-    internal class TestMySqlCacheOptions : IOptions<MySqlCacheOptions>
+	internal class TestMySqlCacheOptions : IOptions<MySqlCacheOptions>
     {
         private readonly MySqlCacheOptions _innerOptions;
 

@@ -61,7 +61,8 @@ namespace Pomelo.Extensions.Caching.MySql
             _systemClock = cacheOptions.SystemClock ?? new SystemClock();
             _expiredItemsDeletionInterval =
                 cacheOptions.ExpiredItemsDeletionInterval ?? DefaultExpiredItemsDeletionInterval;
-            _deleteExpiredCachedItemsDelegate = DeleteExpiredCacheItems;
+			//_lastExpirationScan = _systemClock.UtcNow;
+			_deleteExpiredCachedItemsDelegate = DeleteExpiredCacheItems;
             _defaultSlidingExpiration = cacheOptions.DefaultSlidingExpiration;
 
             // MySqlClient library on Mono doesn't have support for DateTimeOffset and also

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Pomelo.Extensions.Caching.MySql
+namespace Pomelo.Extensions.Caching.MySql.Tests
 {
     public class CacheItemInfo
     {
