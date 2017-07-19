@@ -15,7 +15,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		"UPDATE {0} " +
 		"SET ExpiresAtTime = " +
 			"(CASE " +
-				"WHEN TIME_TO_SEC(TIMEDIFF(@UtcNow, AbsoluteExpiration)) <= SlidingExpirationInSeconds " +
+				"WHEN TIME_TO_SEC(TIMEDIFF(AbsoluteExpiration, @UtcNow)) <= SlidingExpirationInSeconds " +
 					"THEN AbsoluteExpiration " +
 				"ELSE " +
 					"DATE_ADD(@UtcNow, INTERVAL SlidingExpirationInSeconds SECOND) " +
