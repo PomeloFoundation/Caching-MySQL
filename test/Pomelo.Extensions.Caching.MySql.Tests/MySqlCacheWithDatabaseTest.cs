@@ -21,7 +21,6 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		public MySqlCacheWithDatabaseTest(DatabaseOptionsFixture databaseOptionsFixture)
 		{
 			_databaseOptionsFixture = databaseOptionsFixture;
-			_databaseOptionsFixture.FinalCleanup = ClearAllDatabaseEntriesAsync;
 		}
 
 		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
@@ -645,19 +644,6 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				else
 				{
 					return null;
-				}
-			}
-		}
-
-		private async Task ClearAllDatabaseEntriesAsync()
-		{
-			using (var connection = new MySqlConnection(_databaseOptionsFixture.ConnectionString))
-			{
-				using (var command = new MySqlCommand($"DELETE FROM {_databaseOptionsFixture.TableName}", connection))
-				{
-					await connection.OpenAsync();
-
-					await command.ExecuteNonQueryAsync();
 				}
 			}
 		}

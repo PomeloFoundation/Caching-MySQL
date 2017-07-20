@@ -21,8 +21,9 @@ namespace Pomelo.Extensions.Caching.MySql
         private readonly ISystemClock _systemClock;
         private readonly TimeSpan _expiredItemsDeletionInterval;
         private DateTimeOffset _lastExpirationScan;
-        private readonly Func<Task<int>> _deleteExpiredCachedItemsDelegate;
-        private readonly TimeSpan _defaultSlidingExpiration;
+        private readonly Func<Task<int>> _deleteExpiredCachedItemsDelegateAsync;
+		private readonly Func<int> _deleteExpiredCachedItemsDelegate;
+		private readonly TimeSpan _defaultSlidingExpiration;
 
         public MySqlCache(IOptions<MySqlCacheOptions> options)
         {
@@ -61,9 +62,7 @@ namespace Pomelo.Extensions.Caching.MySql
             _systemClock = cacheOptions.SystemClock ?? new SystemClock();
             _expiredItemsDeletionInterval =
                 cacheOptions.ExpiredItemsDeletionInterval ?? DefaultExpiredItemsDeletionInterval;
-			//_lastExpirationScan = _systemClock.UtcNow;
-			_deleteExpiredCachedItemsDelegate = DeleteExpiredCacheItems;
-            _defaultSlidingExpiration = cacheOptions.DefaultSlidingExpiration;
+			_defaultSlidingExpiration = cacheOptions.DefaultSlidingExpiration;
 
             // MySqlClient library on Mono doesn't have support for DateTimeOffset and also
             // it doesn't have support for apis like GetFieldValue, GetFieldValueAsync etc.
@@ -83,8 +82,10 @@ namespace Pomelo.Extensions.Caching.MySql
                     cacheOptions.SchemaName,
                     cacheOptions.TableName,
                     _systemClock);
-            }
-        }
+			}
+			_deleteExpiredCachedItemsDelegateAsync = _dbOperations.DeleteExpiredCacheItemsAsync;
+			_deleteExpiredCachedItemsDelegate = _dbOperations.DeleteExpiredCacheItems;
+		}
 
         public byte[] Get(string key)
         {
@@ -213,27 +214,25 @@ namespace Pomelo.Extensions.Caching.MySql
             await ScanForExpiredItemsIfRequired();
         }
 
-        // Called by multiple actions to see how long it's been since we last checked for expired items.
-        // If sufficient time has elapsed then a scan is initiated on a background task.
-        private async Task ScanForExpiredItemsIfRequired()
-        {
-            var utcNow = _systemClock.UtcNow;
-            // TODO: Multiple threads could trigger this scan which leads to multiple calls to database.
-            if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
-            {
-                _lastExpirationScan = utcNow;
-                await _deleteExpiredCachedItemsDelegate();
-            }
-        }
+		// Called by multiple actions to see how long it's been since we last checked for expired items.
+		// If sufficient time has elapsed then a scan is initiated on a background task.
+		private async Task ScanForExpiredItemsIfRequired()
+		{
+			var utcNow = _systemClock.UtcNow;
+			// TODO: Multiple threads could trigger this scan which leads to multiple calls to database.
+			if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
+			{
+				_lastExpirationScan = utcNow;
 
-        protected virtual async Task<int> DeleteExpiredCacheItems()
-        {
-			//await Task.Delay(1000);
-			var affectedRowCount = await _dbOperations.DeleteExpiredCacheItems();
-			return affectedRowCount;
+				//await Task.Delay(1000);
+				await _deleteExpiredCachedItemsDelegateAsync();
+
+				//Task.Delay(1000);
+				//var runner = Task.Run(_deleteExpiredCachedItemsDelegate);
+			}
 		}
 
-        private void GetOptions(ref DistributedCacheEntryOptions options)
+		private void GetOptions(ref DistributedCacheEntryOptions options)
         {
             if (!options.AbsoluteExpiration.HasValue
                 && !options.AbsoluteExpirationRelativeToNow.HasValue

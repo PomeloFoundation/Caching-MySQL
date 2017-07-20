@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
     <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
   </ItemGroup>
 

@@ -98,7 +98,25 @@ namespace Pomelo.Extensions.Caching.MySql
 			await GetCacheItemAsync(key, includeValue: false);
 		}
 
-		public virtual async Task<int> DeleteExpiredCacheItems()
+		public int DeleteExpiredCacheItems()
+		{
+			var utcNow = SystemClock.UtcNow;
+
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
+				{
+					command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+
+					connection.Open();
+
+					var affectedRowCount = command.ExecuteNonQuery();
+					return affectedRowCount;
+				}
+			}
+		}
+
+		public async Task<int> DeleteExpiredCacheItemsAsync()
 		{
 			var utcNow = SystemClock.UtcNow;
 

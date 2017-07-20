@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Configuration;
+using Pomelo.Data.MySql;
 using System;
 using System.Threading.Tasks;
 
@@ -20,11 +21,11 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		public string TableName => _tableName;
 
-		public Func<Task> FinalCleanup { get; internal set; }
-
 		public string SchemaName => _schemaName;
 
 		public string ConnectionString => _connectionString;
+
+		public Func<Task> FinalCleanup { get; internal set; }
 
 		public DatabaseOptionsFixture()
 		{
@@ -37,6 +38,36 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			_tableName = configuration[TableNameKey];
 			_schemaName = configuration[SchemaNameKey];
 			_connectionString = configuration[ConnectionStringKey];
+
+			EnsureDBCreated().Wait();
+		}
+
+		private async Task EnsureDBCreated()
+		{
+			string create_table = MySqlConfig.Tools.MySqlQueries.CreateTableFormat;
+
+			using (var connection = new MySqlConnection(_connectionString))
+			{
+				using (var command = new MySqlCommand(string.Format(create_table, _tableName), connection))
+				{
+					await connection.OpenAsync();
+
+					await command.ExecuteNonQueryAsync();
+				}
+			}
+		}
+
+		private async Task ClearAllDatabaseEntriesAsync()
+		{
+			using (var connection = new MySqlConnection(_connectionString))
+			{
+				using (var command = new MySqlCommand($"DELETE FROM {_tableName}", connection))
+				{
+					await connection.OpenAsync();
+
+					await command.ExecuteNonQueryAsync();
+				}
+			}
 		}
 
 		#region IDisposable Support
@@ -49,7 +80,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				if (disposing)
 				{
 					// TODO: dispose managed state (managed objects).
-					FinalCleanup?.Invoke();
+					ClearAllDatabaseEntriesAsync().Wait();
 				}
 
 				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
