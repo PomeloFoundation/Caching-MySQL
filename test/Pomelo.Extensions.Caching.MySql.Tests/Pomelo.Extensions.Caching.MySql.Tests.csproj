@@ -20,12 +20,12 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.0.2" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
-	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.0.2" />
-	<PackageReference Include="Moq" Version="4.7.0" />
-	<PackageReference Include="System.Diagnostics.Process" Version="4.1.0" />
-	<PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.1.2" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
+	<PackageReference Include="Moq" Version="4.7.99" />
+	<PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
+	<PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

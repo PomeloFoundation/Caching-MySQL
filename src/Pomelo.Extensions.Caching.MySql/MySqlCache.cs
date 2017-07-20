@@ -21,7 +21,7 @@ namespace Pomelo.Extensions.Caching.MySql
         private readonly ISystemClock _systemClock;
         private readonly TimeSpan _expiredItemsDeletionInterval;
         private DateTimeOffset _lastExpirationScan;
-        private readonly Action _deleteExpiredCachedItemsDelegate;
+        private readonly Func<Task<int>> _deleteExpiredCachedItemsDelegate;
         private readonly TimeSpan _defaultSlidingExpiration;
 
         public MySqlCache(IOptions<MySqlCacheOptions> options)
@@ -95,7 +95,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             var value = _dbOperations.GetCacheItem(key);
 
-            ScanForExpiredItemsIfRequired();
+			ScanForExpiredItemsIfRequired().Wait();
 
             return value;
         }
@@ -109,7 +109,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             var value = await _dbOperations.GetCacheItemAsync(key);
 
-            ScanForExpiredItemsIfRequired();
+			await ScanForExpiredItemsIfRequired();
 
             return value;
         }
@@ -123,7 +123,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             _dbOperations.RefreshCacheItem(key);
 
-            ScanForExpiredItemsIfRequired();
+			ScanForExpiredItemsIfRequired().Wait();
         }
 
         public async Task RefreshAsync(string key)
@@ -135,7 +135,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             await _dbOperations.RefreshCacheItemAsync(key);
 
-            ScanForExpiredItemsIfRequired();
+			await ScanForExpiredItemsIfRequired();
         }
 
         public void Remove(string key)
@@ -147,7 +147,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             _dbOperations.DeleteCacheItem(key);
 
-            ScanForExpiredItemsIfRequired();
+            ScanForExpiredItemsIfRequired().Wait();
         }
 
         public async Task RemoveAsync(string key)
@@ -159,7 +159,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             await _dbOperations.DeleteCacheItemAsync(key);
 
-            ScanForExpiredItemsIfRequired();
+			await ScanForExpiredItemsIfRequired();
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -183,7 +183,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
             _dbOperations.SetCacheItem(key, value, options);
 
-            ScanForExpiredItemsIfRequired();
+            ScanForExpiredItemsIfRequired().Wait();
         }
 
         public async Task SetAsync(
@@ -210,26 +210,28 @@ namespace Pomelo.Extensions.Caching.MySql
 
             await _dbOperations.SetCacheItemAsync(key, value, options);
 
-            ScanForExpiredItemsIfRequired();
+            await ScanForExpiredItemsIfRequired();
         }
 
         // Called by multiple actions to see how long it's been since we last checked for expired items.
         // If sufficient time has elapsed then a scan is initiated on a background task.
-        private void ScanForExpiredItemsIfRequired()
+        private async Task ScanForExpiredItemsIfRequired()
         {
             var utcNow = _systemClock.UtcNow;
             // TODO: Multiple threads could trigger this scan which leads to multiple calls to database.
             if ((utcNow - _lastExpirationScan) > _expiredItemsDeletionInterval)
             {
                 _lastExpirationScan = utcNow;
-                Task.Run(_deleteExpiredCachedItemsDelegate);
+                await _deleteExpiredCachedItemsDelegate();
             }
         }
 
-        private void DeleteExpiredCacheItems()
+        protected virtual async Task<int> DeleteExpiredCacheItems()
         {
-            _dbOperations.DeleteExpiredCacheItems();
-        }
+			//await Task.Delay(1000);
+			var affectedRowCount = await _dbOperations.DeleteExpiredCacheItems();
+			return affectedRowCount;
+		}
 
         private void GetOptions(ref DistributedCacheEntryOptions options)
         {

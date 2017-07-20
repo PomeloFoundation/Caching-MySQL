@@ -12,6 +12,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		private const string ConnectionStringKey = "ConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
+		internal const string NoDBConfiguredSkipReason = null;//"This test requires database server to be setup";
 
 		private readonly string _tableName;
 		private readonly string _schemaName;
@@ -27,19 +28,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		public DatabaseOptionsFixture()
 		{
-			// TODO: Figure how to use config.json which requires resolving IApplicationEnvironment which currently
-			// fails.
-
-			/*var memoryConfigurationData = new Dictionary<string, string>
-			{
-				{ ConnectionStringKey, "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True" },
-				{ SchemaNameKey, "SessionTest" },
-				{ TableNameKey, "CacheTest" },
-			};*/
-
 			var configurationBuilder = new ConfigurationBuilder();
 			configurationBuilder
-				//.AddInMemoryCollection(memoryConfigurationData)
 				.AddJsonFile("config.json")
 				.AddEnvironmentVariables();
 

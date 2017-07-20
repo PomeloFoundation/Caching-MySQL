@@ -24,7 +24,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			_databaseOptionsFixture.FinalCleanup = ClearAllDatabaseEntriesAsync;
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task ReturnsNullValue_ForNonExistingCacheItem()
 		{
 			// Arrange
@@ -37,7 +37,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetWithAbsoluteExpirationSetInThePast_Throws()
 		{
 			// Arrange
@@ -57,7 +57,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal("The absolute expiration value must be in the future.", exception.Message);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetCacheItem_SucceedsFor_KeyEqualToMaximumSize()
 		{
 			// Arrange
@@ -84,7 +84,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(cacheItemInfo);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetCacheItem_FailsFor_KeyGreaterThanMaximumSize()
 		{
 			// Arrange
@@ -105,7 +105,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		}
 
 		// Arrange
-		[Theory]
+		[Theory(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		[InlineData(10, 11)]
 		[InlineData(10, 30)]
 		public async Task SetWithSlidingExpiration_ReturnsNullValue_ForExpiredCacheItem(
@@ -130,7 +130,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Theory]
+		[Theory(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		[InlineData(5, 15)]
 		[InlineData(10, 20)]
 		public async Task SetWithSlidingExpiration_ExtendsExpirationTime(int accessItemAt, int expected)
@@ -158,7 +158,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: expectedExpirationTime);
 		}
 
-		[Theory]
+		[Theory(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		[InlineData(8)]
 		[InlineData(50)]
 		public async Task SetWithSlidingExpirationAndAbsoluteExpiration_ReturnsNullValue_ForExpiredCacheItem(
@@ -188,7 +188,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetWithAbsoluteExpirationRelativeToNow_ReturnsNullValue_ForExpiredCacheItem()
 		{
 			// Arrange
@@ -210,7 +210,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetWithAbsoluteExpiration_ReturnsNullValue_ForExpiredCacheItem()
 		{
 			// Arrange
@@ -233,7 +233,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task ThrowsException_OnNoSlidingOrAbsoluteExpirationOptions()
 		{
 			// Arrange
@@ -252,7 +252,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal("Either absolute or sliding expiration needs to be provided.", exception.Message);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task DoesNotThrowException_WhenOnlyAbsoluteExpirationSupplied_AbsoluteExpirationRelativeToNow()
 		{
 			// Arrange
@@ -280,7 +280,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: expectedAbsoluteExpiration);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task DoesNotThrowException_WhenOnlyAbsoluteExpirationSupplied_AbsoluteExpiration()
 		{
 			// Arrange
@@ -307,7 +307,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: expectedAbsoluteExpiration);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetCacheItem_UpdatesAbsoluteExpirationTime()
 		{
 			// Arrange
@@ -346,7 +346,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: absoluteExpiration);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task SetCacheItem_WithValueLargerThan_DefaultColumnWidth()
 		{
 			// Arrange
@@ -373,7 +373,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: absoluteExpiration);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task ExtendsExpirationTime_ForSlidingExpiration()
 		{
 			// Arrange
@@ -402,7 +402,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal(expectedExpiresAtTime, cacheItemInfo.ExpiresAtTime);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task GetItem_SlidingExpirationDoesNot_ExceedAbsoluteExpirationIfSet()
 		{
 			// Arrange
@@ -458,7 +458,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				expectedExpirationTime: absoluteExpiration);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task DoestNotExtendsExpirationTime_ForAbsoluteExpiration()
 		{
 			// Arrange
@@ -487,7 +487,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal(expectedExpiresAtTime, cacheItemInfo.ExpiresAtTime);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task RefreshItem_ExtendsExpirationTime_ForSlidingExpiration()
 		{
 			// Arrange
@@ -516,7 +516,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal(expectedExpiresAtTime, cacheItemInfo.ExpiresAtTime);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task GetCacheItem_IsCaseSensitive()
 		{
 			// Arrange
@@ -534,7 +534,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(value);
 		}
 
-		[Theory]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task GetCacheItem_DoesNotTrimTrailingSpaces()
 		{
 			// Arrange
@@ -554,7 +554,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal(expectedValue, value);
 		}
 
-		[Fact]
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
 		public async Task DeletesCacheItem_OnExplicitlyCalled()
 		{
 			// Arrange
