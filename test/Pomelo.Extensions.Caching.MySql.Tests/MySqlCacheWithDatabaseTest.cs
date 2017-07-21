@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -570,6 +571,108 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			// Assert
 			var cacheItemInfo = await GetCacheItemFromDatabaseAsync(key);
 			Assert.Null(cacheItemInfo);
+		}
+
+		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
+		public async Task Concurrent_Access()
+		{
+			var testClock = new TestClock();
+			var sqlServerCache = GetCache(testClock);
+
+			// Define the cancellation token.
+			CancellationTokenSource source = new CancellationTokenSource();
+			CancellationToken token = source.Token;
+
+			List<Task<Tuple<int, string>[]>> tasks = new List<Task<Tuple<int, string>[]>>();
+			TaskFactory factory = new TaskFactory(token);
+			for (int taskCtr = 0; taskCtr < 10; taskCtr++)
+			{
+				tasks.Add(factory.StartNew(() =>
+				{
+					var values = new Tuple<int, string>[10];
+					for (int ctr = 0; ctr < 10; ctr++)
+					{
+						bool is_even = (ctr % 2 == 0);//is even number
+
+						Tuple<int, string> value = new Tuple<int, string>(
+							taskCtr,
+							ctr.ToString("D4")//zero padding, string to int requires it
+						);
+						values[ctr] = value;
+
+						var key = $"{nameof(Concurrent_Access)}_iteration_{value.Item1}_{value.Item2}";
+						sqlServerCache.Set(
+							key,
+							Encoding.UTF8.GetBytes($"{value.Item1}_{value.Item2}"),
+							new DistributedCacheEntryOptions()
+								//expire eve number later that odd ones
+								.SetAbsoluteExpiration(is_even ? TimeSpan.FromSeconds(20) : TimeSpan.FromSeconds(10)));
+					}
+					return values;
+				}, token));
+			}
+			try
+			{
+				await factory.ContinueWhenAll(tasks.ToArray(),
+					(all_tasks) =>
+					{
+						//expire odd number, even must stay
+						testClock.Add(TimeSpan.FromSeconds(15));
+
+						int sum = 0;
+						foreach (var task in all_tasks)
+						{
+							foreach (var value in task.Result)
+							{
+								var key = $"{nameof(Concurrent_Access)}_iteration_{value.Item1}_{value.Item2}";
+								var value_as_int = int.Parse(value.Item2);
+								bool is_even = (value_as_int % 2 == 0);//is even number
+
+								var fetched_bytes = sqlServerCache.Get(key);
+								if (is_even)//only even should be fetched
+								{
+									Assert.NotNull(fetched_bytes);
+
+									var fetched_string = Encoding.UTF8.GetString(fetched_bytes);
+									var fetched_tab = fetched_string.Split("_".ToCharArray(), 2);
+									var fetched_int = int.Parse(fetched_tab[1]);
+									Assert.Equal(fetched_int, value_as_int);
+									Assert.Equal(fetched_string, $"{value.Item1}_{value.Item2}");
+
+									sum += value_as_int;
+								}
+								else
+									Assert.Null(fetched_bytes);
+							}
+						}
+
+						return sum;
+
+					}, token)
+					.ContinueWith((fTask) =>
+					{
+						Console.WriteLine("Sum is {0}.", fTask.Result);
+						Assert.Equal(fTask.Result, 200);//counting only even nums:(0+2+4+6+8=20) * 10 => 200
+
+						//expiring even numbers - should be none left
+						testClock.Add(TimeSpan.FromSeconds(10));
+						for (int taskCtr = 0; taskCtr < 10; taskCtr++)
+						{
+							for (int ctr = 0; ctr < 10; ctr++)
+							{
+								var key = $"{nameof(Concurrent_Access)}_iteration_{taskCtr}_{ctr.ToString("D4")}";
+
+								var fetched_bytes = sqlServerCache.Get(key);
+								Assert.Null(fetched_bytes);
+							}
+						}
+
+					}, token);
+			}
+			finally
+			{
+				source.Dispose();
+			}
 		}
 
 		private MySqlCache GetCache(ISystemClock testClock = null)
