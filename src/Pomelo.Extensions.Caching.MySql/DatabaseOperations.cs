@@ -16,7 +16,7 @@ namespace Pomelo.Extensions.Caching.MySql
 	{
 		/// <summary>
 		/// Since there is no specific exception type representing a 'duplicate key' error, we are relying on
-		/// the following message number which represents the following text in Microsoft MySql Server database.
+		/// the following message number which represents the following text in MySql Server database.
 		///     "Violation of %ls constraint '%.*ls'. Cannot insert duplicate key in object '%.*ls'.
 		///     The duplicate key value is %ls."
 		/// You can find the list of system messages by executing the following query:
@@ -105,26 +105,45 @@ namespace Pomelo.Extensions.Caching.MySql
 			await GetCacheItemAsync(key, includeValue: false, token: token);
 		}
 
-		public virtual void DeleteExpiredCacheItems()
+		public int DeleteExpiredCacheItems()
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow;
 
 			using (var connection = new MySqlConnection(ConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{
-					command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow);
+					command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
 					connection.Open();
 
-					var effectedRowCount = command.ExecuteNonQuery();
+					var affectedRowCount = command.ExecuteNonQuery();
+					return affectedRowCount;
+				}
+			}
+		}
+
+		public async Task<int> DeleteExpiredCacheItemsAsync()
+		{
+			var utcNow = SystemClock.UtcNow;
+
+			using (var connection = new MySqlConnection(ConnectionString))
+			{
+				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
+				{
+					command.Parameters.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
+
+					await connection.OpenAsync();
+
+					var affectedRowCount = await command.ExecuteNonQueryAsync();
+					return affectedRowCount;
 				}
 			}
 		}
 
 		public virtual void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
@@ -139,7 +158,7 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddCacheItemValue(value)
 						.AddSlidingExpirationInSeconds(options.SlidingExpiration)
 						.AddAbsoluteExpiration(_absoluteExpiration)
-						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow);
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
 					connection.Open();
 
@@ -167,7 +186,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			token.ThrowIfCancellationRequested();
 
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
@@ -182,7 +201,7 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddCacheItemValue(value)
 						.AddSlidingExpirationInSeconds(options.SlidingExpiration)
 						.AddAbsoluteExpiration(_absoluteExpiration)
-						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow);
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
 					await connection.OpenAsync(token);
 
@@ -208,7 +227,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected virtual byte[] GetCacheItem(string key, bool includeValue)
 		{
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow;
 
 			string query;
 			if (includeValue)
@@ -230,7 +249,7 @@ namespace Pomelo.Extensions.Caching.MySql
 				{
 					command.Parameters
 						.AddCacheItemId(key)
-						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow);
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
 					connection.Open();
 
@@ -275,7 +294,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			token.ThrowIfCancellationRequested();
 
-			var utcNow = SystemClock.UtcNow.DateTime;
+			var utcNow = SystemClock.UtcNow;
 
 			string query;
 			if (includeValue)
@@ -297,7 +316,7 @@ namespace Pomelo.Extensions.Caching.MySql
 				{
 					command.Parameters
 						.AddCacheItemId(key)
-						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow);
+						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
 					await connection.OpenAsync(token);
 

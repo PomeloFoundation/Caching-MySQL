@@ -5,14 +5,15 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
-	internal class MySqlQueries
+	public class MySqlQueries
 	{
-		private const string CreateTableFormat =
-			// Maximum size of primary key column is 900 bytes (898 bytes from key + 2 additional bytes used by the 
-			// Sql Server). In the case where the key is greater than 898 bytes, then it gets truncated.
+		public const string CreateTableFormat =
+			// The index key prefix length limit is 767 bytes for InnoDB tables that use the REDUNDANT or COMPACT row format.
+			// That is why we are using 'CHARACTER SET ascii COLLATE ascii_bin' column and index
+			// https://dev.mysql.com/doc/refman/5.7/en/innodb-restrictions.html
 			// - Add collation to the key column to make it case-sensitive
-			"CREATE TABLE `{0}` (" +
-				"`Id` varchar(250) NOT NULL," +
+			"CREATE TABLE IF NOT EXISTS `{0}` (" +
+				"`Id` varchar(449) CHARACTER SET ascii COLLATE ascii_bin NOT NULL," +
 				"`AbsoluteExpiration` datetime(6) DEFAULT NULL," +
 				"`ExpiresAtTime` datetime(6) NOT NULL," +
 				"`SlidingExpirationInSeconds` bigint(20) DEFAULT NULL," +

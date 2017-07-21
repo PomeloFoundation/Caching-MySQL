@@ -25,6 +25,8 @@ namespace Pomelo.Extensions.Caching.MySql
 
         Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken));
 
-        void DeleteExpiredCacheItems();
-    }
+        Task<int> DeleteExpiredCacheItemsAsync();
+
+		int DeleteExpiredCacheItems();
+	}
 }

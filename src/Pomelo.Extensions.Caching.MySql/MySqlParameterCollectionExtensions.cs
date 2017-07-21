@@ -7,15 +7,19 @@ using Pomelo.Data.MySql;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    internal static class MySqlParameterCollectionExtensions
+	/// <summary>
+	/// TODO: make this class internal again
+	/// </summary>
+	public static class MySqlParameterCollectionExtensions
     {
         // For all values where the length is less than the below value, try setting the size of the
         // parameter for better performance.
         public const int DefaultValueColumnWidth = 8000;
 
-        // Maximum size of a primary key column is 900 bytes (898 bytes from the key + 2 additional bytes required by
-        // the MySql Server).
-        public const int CacheItemIdColumnWidth = 449;
+		// The index key prefix length limit is 767 bytes for InnoDB tables that use the REDUNDANT or COMPACT row format.
+		// That is why we are using 'CHARACTER SET ascii COLLATE ascii_bin' column and index
+		// https://dev.mysql.com/doc/refman/5.7/en/innodb-restrictions.html
+		public const int CacheItemIdColumnWidth = 449;
 
         public static MySqlParameterCollection AddCacheItemId(this MySqlParameterCollection parameters, string value)
         {

@@ -233,7 +233,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public override void DeleteExpiredCacheItems()
+		/*public override void DeleteExpiredCacheItems()
 		{
 			var utcNow = SystemClock.UtcNow;
 
@@ -248,6 +248,6 @@ namespace Pomelo.Extensions.Caching.MySql
 					var effectedRowCount = command.ExecuteNonQuery();
 				}
 			}
-		}
+		}*/
 	}
 }
