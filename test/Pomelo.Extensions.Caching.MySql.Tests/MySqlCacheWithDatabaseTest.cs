@@ -2,12 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Pomelo.Data.MySql;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -94,14 +94,24 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
 			var sqlServerCache = GetCache(testClock);
 
-			// Act
-			await sqlServerCache.SetAsync(
-				key, expectedValue,
-				new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+			Exception exception = null;
+			try
+			{
+				// Act
+				await sqlServerCache.SetAsync(
+					key, expectedValue,
+					new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
 
-			// Assert
-			var cacheItem = await GetCacheItemFromDatabaseAsync(key);
-			Assert.Null(cacheItem);
+				// Assert
+				var cacheItem = await GetCacheItemFromDatabaseAsync(key);
+				Assert.Null(cacheItem);
+			}
+			catch (Exception ex)
+			{
+				exception = ex;
+			}
+			if (exception != null)
+				Assert.Equal("Data too long for column 'Id' at row 1", exception.Message);
 		}
 
 		// Arrange
@@ -573,8 +583,10 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Null(cacheItemInfo);
 		}
 
-		[Fact(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
-		public async Task Concurrent_Access()
+		[Theory(Skip = DatabaseOptionsFixture.NoDBConfiguredSkipReason)]
+		[InlineData(10, 10)]
+		[InlineData(4, 100)]
+		public async Task Concurrent_Access(int threadCount, int accessCount)
 		{
 			var testClock = new TestClock();
 			var sqlServerCache = GetCache(testClock);
@@ -585,18 +597,18 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 			List<Task<Tuple<int, string>[]>> tasks = new List<Task<Tuple<int, string>[]>>();
 			TaskFactory factory = new TaskFactory(token);
-			for (int taskCtr = 0; taskCtr < 10; taskCtr++)
+			for (int taskCtr = 0; taskCtr < threadCount; taskCtr++)
 			{
 				tasks.Add(factory.StartNew(() =>
 				{
-					var values = new Tuple<int, string>[10];
-					for (int ctr = 0; ctr < 10; ctr++)
+					var values = new Tuple<int, string>[accessCount];
+					for (int ctr = 0; ctr < accessCount; ctr++)
 					{
 						bool is_even = (ctr % 2 == 0);//is even number
 
 						Tuple<int, string> value = new Tuple<int, string>(
 							taskCtr,
-							ctr.ToString("D4")//zero padding, string to int requires it
+							ctr.ToString("D8")//zero padding, string to int requires it
 						);
 						values[ctr] = value;
 
@@ -652,15 +664,16 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 					.ContinueWith((fTask) =>
 					{
 						Console.WriteLine("Sum is {0}.", fTask.Result);
-						Assert.Equal(fTask.Result, 200);//counting only even nums:(0+2+4+6+8=20) * 10 => 200
+						//counting only even nums:(0+2+4+6+8=20) * 10 => 200
+						Assert.Equal(fTask.Result, (Enumerable.Range(0, accessCount).Where(x => x % 2 == 0).Sum()) * threadCount);
 
 						//expiring even numbers - should be none left
 						testClock.Add(TimeSpan.FromSeconds(10));
-						for (int taskCtr = 0; taskCtr < 10; taskCtr++)
+						for (int taskCtr = 0; taskCtr < threadCount; taskCtr++)
 						{
-							for (int ctr = 0; ctr < 10; ctr++)
+							for (int ctr = 0; ctr < accessCount; ctr++)
 							{
-								var key = $"{nameof(Concurrent_Access)}_iteration_{taskCtr}_{ctr.ToString("D4")}";
+								var key = $"{nameof(Concurrent_Access)}_iteration_{taskCtr}_{ctr.ToString("D8")}";
 
 								var fetched_bytes = sqlServerCache.Get(key);
 								Assert.Null(fetched_bytes);

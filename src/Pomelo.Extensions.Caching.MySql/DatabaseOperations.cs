@@ -1,14 +1,14 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Data;
-using Pomelo.Data.MySql;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
+using Pomelo.Data.MySql;
+using System;
+using System.Data;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
@@ -363,7 +363,10 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			if (ex.Data != null)
 			{
-				return ex.Data.Cast<MySqlError>().Any(error => error.Code == DuplicateKeyErrorId);
+				if (ex.Data is MySqlError)
+					return ex.Data.Cast<MySqlError>().Any(error => error.Code == DuplicateKeyErrorId);
+				else if (ex.Number == DuplicateKeyErrorId)
+					return true;
 			}
 			return false;
 		}

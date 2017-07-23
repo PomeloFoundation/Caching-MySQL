@@ -5,7 +5,7 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
 {
-    public class CacheItemInfo
+	public class CacheItemInfo
     {
         public string Id { get; set; }
 

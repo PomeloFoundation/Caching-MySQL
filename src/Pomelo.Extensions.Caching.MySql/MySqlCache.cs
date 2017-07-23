@@ -1,19 +1,19 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    /// <summary>
-    /// Distributed cache implementation using Microsoft MySql Server database.
-    /// </summary>
-    public class MySqlCache : IDistributedCache
+	/// <summary>
+	/// Distributed cache implementation using Microsoft MySql Server database.
+	/// </summary>
+	public class MySqlCache : IDistributedCache
     {
         private static readonly TimeSpan MinimumExpiredItemsDeletionInterval = TimeSpan.FromMinutes(5);
         private static readonly TimeSpan DefaultExpiredItemsDeletionInterval = TimeSpan.FromMinutes(30);
@@ -235,10 +235,10 @@ namespace Pomelo.Extensions.Caching.MySql
 				_lastExpirationScan = utcNow;
 
 				//await Task.Delay(1000);
-				await _deleteExpiredCachedItemsDelegateAsync();
+				//await _deleteExpiredCachedItemsDelegateAsync();
 
 				//Task.Delay(1000);
-				//var runner = Task.Run(_deleteExpiredCachedItemsDelegate);
+				await Task.Run(_deleteExpiredCachedItemsDelegate);
 			}
 		}
 
