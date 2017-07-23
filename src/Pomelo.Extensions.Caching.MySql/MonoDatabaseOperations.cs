@@ -1,12 +1,11 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Data;
-using Pomelo.Data.MySql;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
+using Pomelo.Data.MySql;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
 {

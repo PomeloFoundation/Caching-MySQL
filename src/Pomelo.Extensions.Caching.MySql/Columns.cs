@@ -3,7 +3,7 @@
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    internal static class Columns
+	internal static class Columns
     {
         public static class Names
         {

@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Extensions.Internal
 {
-    public class TestClock : ISystemClock
+	public class TestClock : ISystemClock
     {
         public TestClock()
         {

@@ -5,7 +5,7 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-    internal static class PlatformHelper
+	internal static class PlatformHelper
     {
         private static Lazy<bool> _isMono = new Lazy<bool>(() => Type.GetType("Mono.Runtime") != null);
 
