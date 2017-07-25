@@ -13,7 +13,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		private const string ConnectionStringKey = "ConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
-		internal const string NoDBConfiguredSkipReason = null;//"This test requires database server to be setup";
+		internal const string NoDBConfiguredSkipReason = "This test requires database server to be setup";
 
 		private readonly string _tableName;
 		private readonly string _schemaName;
