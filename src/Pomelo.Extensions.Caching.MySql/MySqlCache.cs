@@ -228,7 +228,7 @@ namespace Pomelo.Extensions.Caching.MySql
 				//await _deleteExpiredCachedItemsDelegateAsync();
 
 				//Task.Delay(1000);
-				await Task.Run(_deleteExpiredCachedItemsDelegate);
+				await Task.Run(_deleteExpiredCachedItemsDelegate).ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
 

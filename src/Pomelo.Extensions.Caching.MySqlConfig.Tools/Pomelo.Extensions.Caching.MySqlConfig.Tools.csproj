@@ -21,14 +21,18 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>Pomelo.Extensions.Caching.MySqlConfig.Tools</RootNamespace>
     <Version>1.0.0-preview1-final</Version>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/PomeloFoundation/Caching-MySQL</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;NETCOREAPP1_1</DefineConstants>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>obj\Debug\dotnet-mysql-cache.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\dotnet-mysql-cache.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
   </PropertyGroup>
 
   <ItemGroup>

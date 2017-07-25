@@ -7,10 +7,24 @@
     <PackageId>Pomelo.Extensions.Caching.MySql</PackageId>
     <PackageTags>cache;distributedcache;mysql</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/pomelofoundation/caching-mysql</RepositoryUrl>
+    <RepositoryUrl>https://github.com/PomeloFoundation/Caching-MySQL</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Version>1.0.0-preview1-final</Version>
+    <PackageProjectUrl>https://github.com/PomeloFoundation/Caching-MySQL</PackageProjectUrl>
+    <Copyright>© Pomelo Foundation. All rights reserved.</Copyright>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.6\Pomelo.Extensions.Caching.MySql.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard1.6\Pomelo.Extensions.Caching.MySql.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

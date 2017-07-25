@@ -7,6 +7,25 @@
 	<PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
 	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
 	<RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+	<Version>1.0.0-preview1-final</Version>
+	<Company>Pomelo Foundation</Company>
+	<Product>Pomelo MySql Caching</Product>
+	<Description>Distributed cache implementation of Microsoft.Extensions.Caching.Distributed.IDistributedCache using MySql.</Description>
+	<Copyright>© Pomelo Foundation. All rights reserved.</Copyright>
+	<PackageProjectUrl>https://github.com/PomeloFoundation/Caching-MySQL</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/PomeloFoundation/Caching-MySQL</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>cache;distributedcache;mysql</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp1.1\Pomelo.Extensions.Caching.MySql.Tests.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp1.1\Pomelo.Extensions.Caching.MySql.Tests.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
