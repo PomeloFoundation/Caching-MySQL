@@ -5,6 +5,7 @@ branches:
     - master
     - release
     - dev
+    - 2.0.0-preview
     - /^(.*\/)?ci-.*$/
     - /^rel\/.*/
 build_script:
