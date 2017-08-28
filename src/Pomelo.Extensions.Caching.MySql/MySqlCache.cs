@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -101,14 +102,16 @@ namespace Pomelo.Extensions.Caching.MySql
             return value;
         }
 
-        public async Task<byte[]> GetAsync(string key)
+        public async Task<byte[]> GetAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            var value = await _dbOperations.GetCacheItemAsync(key);
+			token.ThrowIfCancellationRequested();
+
+            var value = await _dbOperations.GetCacheItemAsync(key, token: token);
 
 			await ScanForExpiredItemsIfRequired();
 
@@ -127,14 +130,16 @@ namespace Pomelo.Extensions.Caching.MySql
 			ScanForExpiredItemsIfRequired().Wait();
         }
 
-        public async Task RefreshAsync(string key)
+        public async Task RefreshAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            await _dbOperations.RefreshCacheItemAsync(key);
+			token.ThrowIfCancellationRequested();
+
+            await _dbOperations.RefreshCacheItemAsync(key, token: token);
 
 			await ScanForExpiredItemsIfRequired();
         }
@@ -151,14 +156,16 @@ namespace Pomelo.Extensions.Caching.MySql
             ScanForExpiredItemsIfRequired().Wait();
         }
 
-        public async Task RemoveAsync(string key)
+        public async Task RemoveAsync(string key, CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
                 throw new ArgumentNullException(nameof(key));
             }
 
-            await _dbOperations.DeleteCacheItemAsync(key);
+			token.ThrowIfCancellationRequested();
+
+            await _dbOperations.DeleteCacheItemAsync(key, token: token);
 
 			await ScanForExpiredItemsIfRequired();
         }
@@ -190,7 +197,8 @@ namespace Pomelo.Extensions.Caching.MySql
         public async Task SetAsync(
             string key,
             byte[] value,
-            DistributedCacheEntryOptions options)
+            DistributedCacheEntryOptions options,
+			CancellationToken token = default(CancellationToken))
         {
             if (key == null)
             {
@@ -207,9 +215,11 @@ namespace Pomelo.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(options));
             }
 
+			token.ThrowIfCancellationRequested();
+
             //GetOptions(ref options);
 
-            await _dbOperations.SetCacheItemAsync(key, value, options);
+            await _dbOperations.SetCacheItemAsync(key, value, options, token);
 
             await ScanForExpiredItemsIfRequired();
         }

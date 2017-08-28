@@ -1,40 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>    
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+  <PropertyGroup>
+	<TargetFramework>netcoreapp2.0</TargetFramework>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	<AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
 	<PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
 	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-	<RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="config.json">
-      <!--<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>-->
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+	<Content Include="config.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+	<ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
+	<ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.1.2" />
-	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
-	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
 	<PackageReference Include="Moq" Version="4.7.99" />
-	<PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-	<PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
-    <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
   
 </Project>
