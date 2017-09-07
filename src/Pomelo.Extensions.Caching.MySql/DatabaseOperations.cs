@@ -29,9 +29,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			"Connection string: {2}";
 
 		public DatabaseOperations(
-			string connectionString, string schemaName, string tableName, ISystemClock systemClock)
+			string readConnectionString, string writeConnectionString, string schemaName, string tableName, ISystemClock systemClock)
 		{
-			ConnectionString = connectionString;
+			ReadConnectionString = readConnectionString;
+			WriteConnectionString = writeConnectionString;
 			SchemaName = schemaName;
 			TableName = tableName;
 			SystemClock = systemClock;
@@ -40,7 +41,8 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected MySqlQueries MySqlQueries { get; }
 
-		protected string ConnectionString { get; }
+		protected string ReadConnectionString { get; }
+		protected string WriteConnectionString { get; }
 
 		protected string SchemaName { get; }
 
@@ -50,7 +52,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public void DeleteCacheItem(string key)
 		{
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
 				{
@@ -65,7 +67,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public async Task DeleteCacheItemAsync(string key)
 		{
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
 				{
@@ -102,7 +104,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{
@@ -120,7 +122,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{
@@ -142,7 +144,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 			var _absoluteExpiration = absoluteExpiration?.DateTime;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -183,7 +185,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 			var _absoluteExpiration = absoluteExpiration?.DateTime;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -234,7 +236,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTimeOffset? absoluteExpiration = null;
 			//DateTimeOffset expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
 				{
@@ -299,7 +301,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTime? absoluteExpiration = null;
 			//DateTime expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
 				{

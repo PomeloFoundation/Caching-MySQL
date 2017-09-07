@@ -1,5 +1,7 @@
 ﻿{
-	"ConnectionString": "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True",
+	//"ConnectionString": "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True",
+	"ReadConnectionString": "server=192.168.0.2;user id=SessionTestRead;password=SessionTestRead;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True",
+	"WriteConnectionString": "server=192.168.0.2;user id=SessionTest;password=SessionTest;persistsecurityinfo=True;port=3306;database=SessionTest;SslMode=None;Allow User Variables=True",
 	"SchemaName": "SessionTest",
 	"TableName": "CacheTest"
 }
