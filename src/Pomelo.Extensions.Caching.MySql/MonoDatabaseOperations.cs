@@ -12,8 +12,8 @@ namespace Pomelo.Extensions.Caching.MySql
 	internal class MonoDatabaseOperations : DatabaseOperations
 	{
 		public MonoDatabaseOperations(
-			string connectionString, string schemaName, string tableName, ISystemClock systemClock)
-			: base(connectionString, schemaName, tableName, systemClock)
+		    string readConnectionString, string writeConnectionString, string schemaName, string tableName, ISystemClock systemClock)
+			: base(readConnectionString, writeConnectionString, schemaName, tableName, systemClock)
 		{
 		}
 
@@ -35,7 +35,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTimeOffset? absoluteExpiration = null;
 			//DateTimeOffset expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(ReadConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
 				{
@@ -99,7 +99,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTime? absoluteExpiration = null;
 			//DateTime expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(ReadConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.GetCacheItem, connection))
 				{
@@ -153,7 +153,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -193,7 +193,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -230,7 +230,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(ReadConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{

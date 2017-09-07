@@ -29,10 +29,10 @@ namespace Pomelo.Extensions.Caching.MySql
         {
             var cacheOptions = options.Value;
 
-            if (string.IsNullOrEmpty(cacheOptions.ConnectionString))
+            if (string.IsNullOrEmpty(cacheOptions.ReadConnectionString))
             {
                 throw new ArgumentException(
-                    $"{nameof(MySqlCacheOptions.ConnectionString)} cannot be empty or null.");
+                    $"{nameof(MySqlCacheOptions.ReadConnectionString)} cannot be empty or null.");
             }
             if (string.IsNullOrEmpty(cacheOptions.SchemaName))
             {
@@ -70,7 +70,8 @@ namespace Pomelo.Extensions.Caching.MySql
             if (PlatformHelper.IsMono)
             {
                 _dbOperations = new MonoDatabaseOperations(
-                    cacheOptions.ConnectionString,
+                    cacheOptions.ReadConnectionString,
+                    cacheOptions.WriteConnectionString,
                     cacheOptions.SchemaName,
                     cacheOptions.TableName,
                     _systemClock);
@@ -78,7 +79,8 @@ namespace Pomelo.Extensions.Caching.MySql
             else
             {
                 _dbOperations = new DatabaseOperations(
-                    cacheOptions.ConnectionString,
+                    cacheOptions.ReadConnectionString,
+                    cacheOptions.WriteConnectionString,
                     cacheOptions.SchemaName,
                     cacheOptions.TableName,
                     _systemClock);

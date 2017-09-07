@@ -37,7 +37,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
             // Act
             services.AddDistributedMySqlCache(options => {
-                options.ConnectionString = "Fake";
+                options.ReadConnectionString = "Fake";
                 options.SchemaName = "Fake";
                 options.TableName = "Fake";
             });
