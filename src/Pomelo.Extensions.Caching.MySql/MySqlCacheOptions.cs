@@ -7,10 +7,10 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-	/// <summary>
-	/// Configuration options for <see cref="MySqlCache"/>.
-	/// </summary>
-	public class MySqlCacheOptions : IOptions<MySqlCacheOptions>
+    /// <summary>
+    /// Configuration options for <see cref="MySqlCache"/>.
+    /// </summary>
+    public class MySqlCacheOptions : IOptions<MySqlCacheOptions>
     {
         /// <summary>
         /// An abstraction to represent the clock of a machine in order to enable unit testing.
@@ -22,10 +22,32 @@ namespace Pomelo.Extensions.Caching.MySql
         /// </summary>
         public TimeSpan? ExpiredItemsDeletionInterval { get; set; }
 
+        private string _connectionString;
+
         /// <summary>
         /// The connection string to the database.
+        /// Can be used when ReadConnection and WriteConnection are the same.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string ConnectionString
+        {
+            get => _connectionString;
+            set
+            {
+                _connectionString = value;
+                ReadConnectionString = value;
+                WriteConnectionString = value;
+            }
+        }
+
+        /// <summary>
+        /// The connection string to the database used for reading data.
+        /// </summary>
+        public string ReadConnectionString { get; set; }
+
+        /// <summary>
+        /// The connection string to the database used for writing data.
+        /// </summary>
+        public string WriteConnectionString { get; set; }
 
         /// <summary>
         /// The schema name of the table.
