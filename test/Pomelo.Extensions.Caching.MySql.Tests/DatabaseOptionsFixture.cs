@@ -10,7 +10,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 {
 	public class DatabaseOptionsFixture : IDisposable
 	{
-		private const string ConnectionStringKey = "ConnectionString";
+		private const string ConnectionStringKey = "ReadConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
 		internal const string NoDBConfiguredSkipReason = "This test requires database server to be setup";

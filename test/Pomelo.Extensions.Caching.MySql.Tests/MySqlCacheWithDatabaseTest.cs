@@ -692,7 +692,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			var options = new MySqlCacheOptions()
 			{
-				ConnectionString = _databaseOptionsFixture.ConnectionString,
+				ReadConnectionString = _databaseOptionsFixture.ConnectionString,
 				SchemaName = _databaseOptionsFixture.SchemaName,
 				TableName = _databaseOptionsFixture.TableName,
 				SystemClock = testClock ?? new TestClock(),
