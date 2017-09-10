@@ -7,6 +7,7 @@ using Pomelo.Data.MySql;
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -29,9 +30,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			"Connection string: {2}";
 
 		public DatabaseOperations(
-			string connectionString, string schemaName, string tableName, ISystemClock systemClock)
+			string readConnectionString, string writeConnectionString, string schemaName, string tableName, ISystemClock systemClock)
 		{
-			ConnectionString = connectionString;
+			ReadConnectionString = readConnectionString;
+			WriteConnectionString = writeConnectionString;
 			SchemaName = schemaName;
 			TableName = tableName;
 			SystemClock = systemClock;
@@ -40,7 +42,8 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected MySqlQueries MySqlQueries { get; }
 
-		protected string ConnectionString { get; }
+		protected string ReadConnectionString { get; }
+		protected string WriteConnectionString { get; }
 
 		protected string SchemaName { get; }
 
@@ -50,7 +53,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public void DeleteCacheItem(string key)
 		{
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
 				{
@@ -63,17 +66,19 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public async Task DeleteCacheItemAsync(string key)
+		public async Task DeleteCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			using (var connection = new MySqlConnection(ConnectionString))
+			token.ThrowIfCancellationRequested();
+
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
 				{
 					command.Parameters.AddCacheItemId(key);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
-					await command.ExecuteNonQueryAsync();
+					await command.ExecuteNonQueryAsync(token);
 				}
 			}
 		}
@@ -83,9 +88,11 @@ namespace Pomelo.Extensions.Caching.MySql
 			return GetCacheItem(key, includeValue: true);
 		}
 
-		public virtual async Task<byte[]> GetCacheItemAsync(string key)
+		public virtual async Task<byte[]> GetCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			return await GetCacheItemAsync(key, includeValue: true);
+			token.ThrowIfCancellationRequested();
+
+			return await GetCacheItemAsync(key, includeValue: true, token: token);
 		}
 
 		public void RefreshCacheItem(string key)
@@ -93,16 +100,18 @@ namespace Pomelo.Extensions.Caching.MySql
 			GetCacheItem(key, includeValue: false);
 		}
 
-		public async Task RefreshCacheItemAsync(string key)
+		public async Task RefreshCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			await GetCacheItemAsync(key, includeValue: false);
+			token.ThrowIfCancellationRequested();
+
+			await GetCacheItemAsync(key, includeValue: false, token: token);
 		}
 
 		public int DeleteExpiredCacheItems()
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{
@@ -120,7 +129,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{
@@ -142,7 +151,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 			var _absoluteExpiration = absoluteExpiration?.DateTime;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -175,15 +184,17 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
+		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			var utcNow = SystemClock.UtcNow;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 			var _absoluteExpiration = absoluteExpiration?.DateTime;
 
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var upsertCommand = new MySqlCommand(MySqlQueries.SetCacheItem, connection))
 				{
@@ -194,11 +205,11 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddAbsoluteExpiration(_absoluteExpiration)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					try
 					{
-						await upsertCommand.ExecuteNonQueryAsync();
+						await upsertCommand.ExecuteNonQueryAsync(token);
 					}
 					catch (MySqlException ex)
 					{
@@ -234,7 +245,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTimeOffset? absoluteExpiration = null;
 			//DateTimeOffset expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
 				{
@@ -281,8 +292,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
+		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			var utcNow = SystemClock.UtcNow;
 
 			string query;
@@ -299,7 +312,7 @@ namespace Pomelo.Extensions.Caching.MySql
 			//TimeSpan? slidingExpiration = null;
 			//DateTime? absoluteExpiration = null;
 			//DateTime expirationTime;
-			using (var connection = new MySqlConnection(ConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(query, connection))
 				{
@@ -307,13 +320,14 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddCacheItemId(key)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					using (var reader = await command.ExecuteReaderAsync(
-						CommandBehavior.SequentialAccess | CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+						CommandBehavior.SequentialAccess | CommandBehavior.SingleRow | CommandBehavior.SingleResult,
+						token))
 					{
 
-						if (await reader.ReadAsync())
+						if (await reader.ReadAsync(token))
 						{
 							/*var id = await reader.GetFieldValueAsync<string>(Columns.Indexes.CacheItemIdIndex);
 
@@ -334,7 +348,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 							if (includeValue)
 							{
-								value = await reader.GetFieldValueAsync<byte[]>(Columns.Indexes.CacheItemValueIndex);
+								value = await reader.GetFieldValueAsync<byte[]>(Columns.Indexes.CacheItemValueIndex, token);
 							}
 						}
 						else
