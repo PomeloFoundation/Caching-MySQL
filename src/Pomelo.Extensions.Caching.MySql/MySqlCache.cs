@@ -117,7 +117,6 @@ namespace Pomelo.Extensions.Caching.MySql
 			token.ThrowIfCancellationRequested();
 
             var value = await _dbOperations.GetCacheItemAsync(key, token: token);
-
 			await ScanForExpiredItemsIfRequired();
 
 			return value;
