@@ -236,7 +236,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			var utcNow = SystemClock.UtcNow;
 
-			using (var connection = new MySqlConnection(ReadConnectionString))
+			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteExpiredCacheItems, connection))
 				{

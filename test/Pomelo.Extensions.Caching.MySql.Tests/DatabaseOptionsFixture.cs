@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Pomelo.Data.MySql;
 using System;
 using System.Threading.Tasks;
@@ -10,22 +11,12 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 {
 	public class DatabaseOptionsFixture : IDisposable
 	{
-		private const string ConnectionStringKey = "ReadConnectionString";
+		private const string ReadConnectionStringKey = "ReadConnectionString", WriteConnectionStringKey = "WriteConnectionString", ConnectionStringKey = "ConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
 		internal const string NoDBConfiguredSkipReason = "This test requires database server to be setup";
 
-		private readonly string _tableName;
-		private readonly string _schemaName;
-		private readonly string _connectionString;
-
-		public string TableName => _tableName;
-
-		public string SchemaName => _schemaName;
-
-		public string ConnectionString => _connectionString;
-
-		public Func<Task> FinalCleanup { get; internal set; }
+		public IOptions<MySqlCacheOptions> Options { get; private set; }
 
 		public DatabaseOptionsFixture()
 		{
@@ -35,9 +26,15 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				.AddEnvironmentVariables();
 
 			var configuration = configurationBuilder.Build();
-			_tableName = configuration[TableNameKey];
-			_schemaName = configuration[SchemaNameKey];
-			_connectionString = configuration[ConnectionStringKey];
+
+			Options = new MySqlCacheOptions()
+			{
+				TableName = configuration[TableNameKey],
+				SchemaName = configuration[SchemaNameKey],
+				ConnectionString = configuration[ConnectionStringKey],
+				ReadConnectionString = configuration[ReadConnectionStringKey],
+				WriteConnectionString = configuration[WriteConnectionStringKey]
+			};
 
 			EnsureDBCreated().Wait();
 		}
@@ -46,9 +43,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			string create_table = MySqlConfig.Tools.MySqlQueries.CreateTableFormat;
 
-			using (var connection = new MySqlConnection(_connectionString))
+			using (var connection = new MySqlConnection(Options.Value.WriteConnectionString))
 			{
-				using (var command = new MySqlCommand(string.Format(create_table, _tableName), connection))
+				using (var command = new MySqlCommand(string.Format(create_table, Options.Value.TableName), connection))
 				{
 					await connection.OpenAsync();
 
@@ -59,9 +56,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private async Task ClearAllDatabaseEntriesAsync()
 		{
-			using (var connection = new MySqlConnection(_connectionString))
+			using (var connection = new MySqlConnection(Options.Value.WriteConnectionString))
 			{
-				using (var command = new MySqlCommand($"DELETE FROM {_tableName}", connection))
+				using (var command = new MySqlCommand($"DELETE FROM {Options.Value.TableName}", connection))
 				{
 					await connection.OpenAsync();
 

@@ -295,7 +295,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			// Arrange
 			var testClock = new TestClock();
-			var expectedAbsoluteExpiration = new DateTimeOffset(2025, 1, 1, 1, 0, 0, TimeSpan.Zero);
+			var expectedAbsoluteExpiration = new DateTimeOffset(DateTime.Now.Year + 8/*long in the future*/, 1, 1, 1, 0, 0, TimeSpan.Zero);
 			var key = Guid.NewGuid().ToString();
 			var sqlServerCache = GetCache();
 			var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
@@ -690,14 +690,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{
-			var options = new MySqlCacheOptions()
-			{
-				ReadConnectionString = _databaseOptionsFixture.ConnectionString,
-				SchemaName = _databaseOptionsFixture.SchemaName,
-				TableName = _databaseOptionsFixture.TableName,
-				SystemClock = testClock ?? new TestClock(),
-				ExpiredItemsDeletionInterval = TimeSpan.FromHours(2)
-			};
+			var options = _databaseOptionsFixture.Options.Value;
+			options.SystemClock = testClock ?? new TestClock();
+			options.ExpiredItemsDeletionInterval = TimeSpan.FromHours(2);
 
 			return new MySqlCache(new TestMySqlCacheOptions(options));
 		}
@@ -722,11 +717,11 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private async Task<CacheItemInfo> GetCacheItemFromDatabaseAsync(string key)
 		{
-			using (var connection = new MySqlConnection(_databaseOptionsFixture.ConnectionString))
+			using (var connection = new MySqlConnection(_databaseOptionsFixture.Options.Value.ReadConnectionString))
 			{
 				var command = new MySqlCommand(
 					$"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
-					$"FROM {_databaseOptionsFixture.TableName} WHERE Id = @Id",
+					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE Id = @Id",
 					connection);
 				command.Parameters.AddWithValue("Id", key);
 
