@@ -25,6 +25,7 @@ branches:
     - release
     - dev
     - appveyor
+    - 2.0.0-preview
     - /^(.*\/)?ci-.*$/
     - /^rel\/.*/
 before_install:
