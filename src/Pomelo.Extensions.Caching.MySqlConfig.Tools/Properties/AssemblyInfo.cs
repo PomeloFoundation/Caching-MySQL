@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Resources;
 
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: NeutralResourcesLanguage("en-us")]
+[assembly: NeutralResourcesLanguage("")]
 [assembly: AssemblyCompany("Pomelo Foundation")]
 [assembly: AssemblyCopyright("© Pomelo Foundation. All rights reserved.")]
 [assembly: AssemblyProduct("Pomelo MySql Caching")]

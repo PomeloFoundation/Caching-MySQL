@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Caching.Distributed;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -11,19 +10,19 @@ namespace Pomelo.Extensions.Caching.MySql
     {
         byte[] GetCacheItem(string key);
 
-        Task<byte[]> GetCacheItemAsync(string key, CancellationToken token = default(CancellationToken));
+        Task<byte[]> GetCacheItemAsync(string key);
 
         void RefreshCacheItem(string key);
 
-        Task RefreshCacheItemAsync(string key, CancellationToken token = default(CancellationToken));
+        Task RefreshCacheItemAsync(string key);
 
         void DeleteCacheItem(string key);
 
-        Task DeleteCacheItemAsync(string key, CancellationToken token = default(CancellationToken));
+        Task DeleteCacheItemAsync(string key);
 
         void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options);
 
-        Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken));
+        Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options);
 
         Task<int> DeleteExpiredCacheItemsAsync();
 
