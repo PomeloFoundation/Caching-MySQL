@@ -7,7 +7,6 @@ using Pomelo.Data.MySql;
 using System;
 using System.Data;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -68,8 +67,6 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public async Task DeleteCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
-
 			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
@@ -186,8 +183,6 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
-
 			var utcNow = SystemClock.UtcNow;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
@@ -294,8 +289,6 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue, CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
-
 			var utcNow = SystemClock.UtcNow;
 
 			string query;

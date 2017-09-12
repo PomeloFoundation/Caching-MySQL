@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pomelo Foundation")]
-[assembly: AssemblyProduct("Pomelo.Extensions.Caching.MySql")]
+[assembly: AssemblyProduct("Pomelo MySql Caching")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
