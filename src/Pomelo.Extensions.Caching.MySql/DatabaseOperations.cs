@@ -7,6 +7,7 @@ using Pomelo.Data.MySql;
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -65,17 +66,19 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public async Task DeleteCacheItemAsync(string key)
+		public async Task DeleteCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			using (var connection = new MySqlConnection(WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(MySqlQueries.DeleteCacheItem, connection))
 				{
 					command.Parameters.AddCacheItemId(key);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
-					await command.ExecuteNonQueryAsync();
+					await command.ExecuteNonQueryAsync(token);
 				}
 			}
 		}
@@ -85,9 +88,11 @@ namespace Pomelo.Extensions.Caching.MySql
 			return GetCacheItem(key, includeValue: true);
 		}
 
-		public virtual async Task<byte[]> GetCacheItemAsync(string key)
+		public virtual async Task<byte[]> GetCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			return await GetCacheItemAsync(key, includeValue: true);
+			token.ThrowIfCancellationRequested();
+
+			return await GetCacheItemAsync(key, includeValue: true, token: token);
 		}
 
 		public void RefreshCacheItem(string key)
@@ -95,9 +100,11 @@ namespace Pomelo.Extensions.Caching.MySql
 			GetCacheItem(key, includeValue: false);
 		}
 
-		public async Task RefreshCacheItemAsync(string key)
+		public async Task RefreshCacheItemAsync(string key, CancellationToken token = default(CancellationToken))
 		{
-			await GetCacheItemAsync(key, includeValue: false);
+			token.ThrowIfCancellationRequested();
+
+			await GetCacheItemAsync(key, includeValue: false, token: token);
 		}
 
 		public int DeleteExpiredCacheItems()
@@ -177,8 +184,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
+		public virtual async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			var utcNow = SystemClock.UtcNow;
 
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
@@ -196,11 +205,11 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddAbsoluteExpiration(_absoluteExpiration)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					try
 					{
-						await upsertCommand.ExecuteNonQueryAsync();
+						await upsertCommand.ExecuteNonQueryAsync(token);
 					}
 					catch (MySqlException ex)
 					{
@@ -283,8 +292,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
+		protected virtual async Task<byte[]> GetCacheItemAsync(string key, bool includeValue, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			var utcNow = SystemClock.UtcNow;
 
 			string query;
@@ -309,13 +320,14 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddCacheItemId(key)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					using (var reader = await command.ExecuteReaderAsync(
-						CommandBehavior.SequentialAccess | CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+						CommandBehavior.SequentialAccess | CommandBehavior.SingleRow | CommandBehavior.SingleResult,
+						token))
 					{
 
-						if (await reader.ReadAsync())
+						if (await reader.ReadAsync(token))
 						{
 							/*var id = await reader.GetFieldValueAsync<string>(Columns.Indexes.CacheItemIdIndex);
 
@@ -336,7 +348,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 							if (includeValue)
 							{
-								value = await reader.GetFieldValueAsync<byte[]>(Columns.Indexes.CacheItemValueIndex);
+								value = await reader.GetFieldValueAsync<byte[]>(Columns.Indexes.CacheItemValueIndex, token);
 							}
 						}
 						else

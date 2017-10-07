@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
 using Pomelo.Data.MySql;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -81,8 +82,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			return value;
 		}
 
-		protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue)
+		protected override async Task<byte[]> GetCacheItemAsync(string key, bool includeValue, CancellationToken token = default(CancellationToken))
 		{
+			token.ThrowIfCancellationRequested();
+
 			var utcNow = SystemClock.UtcNow;
 
 			string query;
@@ -107,12 +110,13 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddCacheItemId(key)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					using (var reader = await command.ExecuteReaderAsync(
-						CommandBehavior.SingleRow | CommandBehavior.SingleResult))
+						CommandBehavior.SingleRow | CommandBehavior.SingleResult,
+						token))
 					{
-						if (await reader.ReadAsync())
+						if (await reader.ReadAsync(token))
 						{
 							/*var id = reader.GetString(Columns.Indexes.CacheItemIdIndex);
 
@@ -186,10 +190,12 @@ namespace Pomelo.Extensions.Caching.MySql
 			}
 		}
 
-		public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options)
+		public override async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken))
 		{
-			var utcNow = SystemClock.UtcNow;
+			token.ThrowIfCancellationRequested();
 
+			var utcNow = SystemClock.UtcNow;
+					
 			var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
 			ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
@@ -204,11 +210,11 @@ namespace Pomelo.Extensions.Caching.MySql
 						.AddAbsoluteExpirationMono(absoluteExpiration)
 						.AddWithValue("UtcNow", MySqlDbType.DateTime, utcNow.UtcDateTime);
 
-					await connection.OpenAsync();
+					await connection.OpenAsync(token);
 
 					try
 					{
-						await upsertCommand.ExecuteNonQueryAsync();
+						await upsertCommand.ExecuteNonQueryAsync(token);
 					}
 					catch (MySqlException ex)
 					{
