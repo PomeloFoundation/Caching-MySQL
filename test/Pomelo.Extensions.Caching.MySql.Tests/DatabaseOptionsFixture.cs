@@ -14,7 +14,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		private const string ReadConnectionStringKey = "ReadConnectionString", WriteConnectionStringKey = "WriteConnectionString", ConnectionStringKey = "ConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
-		internal const string NoDBConfiguredSkipReason = "This test requires database server to be setup";
+		internal const string SetToNullAfterPreparingConfigSetupForDBTests = "This test requires database server to be setup";
 
 		public IOptions<MySqlCacheOptions> Options { get; private set; }
 
