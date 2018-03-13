@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B79568AA-DBEA-4F82-96B9-725E5C31F6A1}"
 EndProject
@@ -10,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
 		build.cmd = build.cmd
-		build.ps1 = build.ps1
 		build.sh = build.sh
 		global.json = global.json
 	EndProjectSection
@@ -49,5 +47,8 @@ Global
 		{CDEA696F-DEB6-4A0F-A53B-131C1ED39B4F} = {B79568AA-DBEA-4F82-96B9-725E5C31F6A1}
 		{B6A1F39B-D171-451A-A648-95D818315A85} = {B79568AA-DBEA-4F82-96B9-725E5C31F6A1}
 		{63195A6B-B047-42A9-B7F5-B9751F327863} = {E2AF8BA6-D1B2-4005-9994-922227DBD1D3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D671E12-ED90-497C-BE8C-46E660294B3F}
 	EndGlobalSection
 EndGlobal

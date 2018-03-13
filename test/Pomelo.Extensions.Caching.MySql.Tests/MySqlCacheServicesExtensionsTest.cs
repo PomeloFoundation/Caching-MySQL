@@ -23,7 +23,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			MySqlServerCachingServicesExtensions.AddMySqlCacheServices(services);
 
 			// Assert
-			Assert.Equal(1, services.Count);
+			Assert.True(1 == services?.Count);
 			var serviceDescriptor = services[0];
 			Assert.Equal(typeof(IDistributedCache), serviceDescriptor.ServiceType);
 			Assert.Equal(typeof(MySqlCache), serviceDescriptor.ImplementationType);

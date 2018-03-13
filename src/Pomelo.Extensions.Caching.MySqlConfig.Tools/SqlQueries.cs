@@ -5,7 +5,7 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
-	public class MySqlQueries
+	internal class MySqlQueries
 	{
 		public const string CreateTableFormat =
 			// The index key prefix length limit is 767 bytes for InnoDB tables that use the REDUNDANT or COMPACT row format.

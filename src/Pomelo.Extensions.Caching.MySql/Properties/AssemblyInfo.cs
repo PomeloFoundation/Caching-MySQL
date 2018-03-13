@@ -17,3 +17,4 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("b9ad0f06-39e4-4892-8691-2b01db5a1067")]
+[assembly:InternalsVisibleTo("Pomelo.Extensions.Caching.MySql.Tests")]
