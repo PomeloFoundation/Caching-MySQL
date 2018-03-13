@@ -20,7 +20,7 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>Pomelo.Extensions.Caching.MySqlConfig.Tools</RootNamespace>
-    <Version>2.0.0-preview1-final</Version>
+    <Version>2.0.0-final</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
   </PropertyGroup>
