@@ -24,7 +24,7 @@
 	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.1" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
-	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.1.1" />
+	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.1.2" />
 	<PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
 	<PackageReference Include="Moq" Version="4.9.0" />
   </ItemGroup>
