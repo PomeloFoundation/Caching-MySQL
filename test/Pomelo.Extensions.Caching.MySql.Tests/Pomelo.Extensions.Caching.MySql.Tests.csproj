@@ -5,6 +5,7 @@
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	<AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
 	<PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
+	<UserSecretsId>Caching-MySQL-88E451EA-603F-417A-A190-62081E1B3A8C</UserSecretsId>
 	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
@@ -23,6 +24,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.1.1" />
 	<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
+	<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.1.1" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
 	<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.1.2" />
 	<PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
