@@ -1,11 +1,13 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
-using Pomelo.Data.MySql;
+using MySql.Data.MySqlClient;
 using System;
 using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
@@ -56,7 +58,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
-					command.OnExecute(() =>
+					command.OnExecute(async () =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
 						|| string.IsNullOrEmpty(databaseNameArg.Value)
@@ -71,7 +73,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						_databaseName = databaseNameArg.Value;
 						_tableName = tableNameArg.Value;
 
-						return CreateTableAndIndexes();
+						return await CreateTableAndIndexes();
 					});
 				});
 
@@ -91,20 +93,20 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			}
 		}
 
-		private int CreateTableAndIndexes()
+		private async Task<int> CreateTableAndIndexes(CancellationToken token = default(CancellationToken))
 		{
 			ValidateConnectionString();
 
 			using (var connection = new MySqlConnection(_connectionString))
 			{
-				connection.Open();
+				await connection.OpenAsync(token);
 
 				var sqlQueries = new MySqlQueries(_databaseName, _tableName);
 				using (var command = new MySqlCommand(sqlQueries.TableInfo, connection))
 				{
-					using (var reader = command.ExecuteReader(CommandBehavior.SingleRow))
+					using (var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token))
 					{
-						if (reader.Read())
+						if (await reader.ReadAsync(token))
 						{
 							_logger.LogWarning(
 								$"Table '{_tableName}' from database '{_databaseName}' already exists. " +
@@ -121,13 +123,13 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						using (var command = new MySqlCommand(sqlQueries.CreateTable,
 							connection, transaction))
 						{
-							command.ExecuteNonQuery();
+							await command.ExecuteNonQueryAsync(token);
 						}
 
 						//using (var command = new MySqlCommand(sqlQueries.CreateNonClusteredIndexOnExpirationTime,
 						//	connection, transaction))
 						//{
-						//	command.ExecuteNonQuery();
+						//	await command.ExecuteNonQueryAsync(token);
 						//}
 
 						transaction.Commit();

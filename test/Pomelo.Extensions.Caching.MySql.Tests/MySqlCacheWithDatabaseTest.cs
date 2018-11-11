@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
-using Pomelo.Data.MySql;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,7 +23,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			_databaseOptionsFixture = databaseOptionsFixture;
 		}
-		
+
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task ReturnsNullValue_ForNonExistingCacheItem()
 		{
@@ -685,6 +685,74 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 		}
 
+		[IgnoreWhenNoSqlSetupTheory]
+		[InlineData(100, 200, 1000)]
+		[InlineData(5, 2000, 10000)]
+		[InlineData(10, 500, 10)]
+		public void Profiling(int threadCount, int outerLoop, int innerLoop)
+		{
+			// Runs several concurrent threads that access an item that periodically expires and is re-created.
+			var cache = GetCache();
+			string key = "MyKey";
+
+			var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMilliseconds(50));
+
+			var tasks = new List<Task>();
+			for (int threads = 0; threads < threadCount; threads++)
+			{
+				var task = Task.Run(async () =>
+				{
+					for (int i = 0; i < outerLoop; i++)
+					{
+						byte[] bytes = await cache.GetAsync(key);
+						if (bytes == null)
+						{
+							// Fake expensive object creation.
+							for (int j = 0; j < innerLoop; j++)
+							{
+							}
+
+							await cache.SetAsync(key, new byte[] { new byte() }, options);
+						}
+					}
+				});
+				tasks.Add(task);
+			}
+
+			Console.WriteLine("Running");
+			Task.WaitAll(tasks.ToArray());
+			Console.WriteLine("Done");
+		}
+
+		[IgnoreWhenNoSqlSetupFact]
+		public async Task IsDuplicateKeyException()
+		{
+			MySqlCache cache = GetCache();
+			var options = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(10));
+			string key = "MyKey";
+			var expectedValue = Encoding.UTF8.GetBytes("MyValue");
+
+			await cache.SetAsync(key, expectedValue, options);
+			
+			CacheItemInfo value = new CacheItemInfo
+			{
+				Id = key,
+				Value = expectedValue,
+				ExpiresAtTime = DateTimeOffset.Now,
+				//AbsoluteExpiration = DateTimeOffset.Now,
+				SlidingExpirationInSeconds = TimeSpan.FromSeconds(10)
+			};
+
+			var exception = await Assert.ThrowsAsync<MySqlException>(async () =>
+			{
+				await SetCacheItemFromDatabaseAsync(key, value);
+			});
+			Assert.NotNull(exception);
+			Assert.Equal(1062, exception.Number);
+
+			await cache.SetAsync(key, expectedValue, options);
+		}
+
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{
 			var options = _databaseOptionsFixture.Options.Value;
@@ -717,7 +785,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			using (var connection = new MySqlConnection(_databaseOptionsFixture.Options.Value.ReadConnectionString))
 			{
 				var command = new MySqlCommand(
-					$"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
+					"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
 					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE Id = @Id",
 					connection);
 				command.Parameters.AddWithValue("Id", key);
@@ -730,11 +798,13 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				// we cannot use GetFieldValueAsync etc.
 				if (await reader.ReadAsync())
 				{
-					var cacheItemInfo = new CacheItemInfo();
-					cacheItemInfo.Id = key;
-					cacheItemInfo.Value = (byte[])reader[1];
-					cacheItemInfo.ExpiresAtTime = DateTimeOffset.Parse(reader[2].ToString(), System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat,
-						System.Globalization.DateTimeStyles.AssumeUniversal);
+					var cacheItemInfo = new CacheItemInfo
+					{
+						Id = key,
+						Value = (byte[])reader[1],
+						ExpiresAtTime = DateTimeOffset.Parse(reader[2].ToString(), System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat,
+						System.Globalization.DateTimeStyles.AssumeUniversal)
+					};
 
 					if (!await reader.IsDBNullAsync(3))
 					{
@@ -753,6 +823,28 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				{
 					return null;
 				}
+			}
+		}
+
+		private async Task<bool> SetCacheItemFromDatabaseAsync(string key, CacheItemInfo value, CancellationToken token = default(CancellationToken))
+		{
+			using (var connection = new MySqlConnection(_databaseOptionsFixture.Options.Value.WriteConnectionString))
+			{
+				var command = new MySqlCommand(
+					$"INSERT INTO {_databaseOptionsFixture.Options.Value.TableName} " +
+					"(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+					"VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration)",
+					connection);
+				command.Parameters.AddWithValue("Id", value.Id);
+				command.Parameters.AddWithValue("Value", value.Value);
+				command.Parameters.AddWithValue("ExpiresAtTime", value.ExpiresAtTime);
+				command.Parameters.AddWithValue("SlidingExpirationInSeconds", value.SlidingExpirationInSeconds);
+				command.Parameters.AddWithValue("AbsoluteExpiration", value.AbsoluteExpiration);
+
+				await connection.OpenAsync(token);
+
+				var changed_rows = await command.ExecuteNonQueryAsync(token);
+				return changed_rows > 0;
 			}
 		}
 
