@@ -1,39 +1,82 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Pomelo.Data.MySql;
+using MySql.Data.MySqlClient;
 using System;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
 {
+	public class IgnoreWhenNoSqlSetupFactAttribute : FactAttribute
+	{
+		public IgnoreWhenNoSqlSetupFactAttribute()
+		{
+			if (string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
+				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
+				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]))
+			{
+				Skip = "This test requires database server to be setup";
+			}
+		}
+	}
+
+	public class IgnoreWhenNoSqlSetupTheoryAttribute : TheoryAttribute
+	{
+		public IgnoreWhenNoSqlSetupTheoryAttribute()
+		{
+			if (string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
+				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
+				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]))
+			{
+				Skip = "This test requires database server to be setup";
+			}
+		}
+	}
+
 	public class DatabaseOptionsFixture : IDisposable
 	{
 		private const string ReadConnectionStringKey = "ReadConnectionString", WriteConnectionStringKey = "WriteConnectionString", ConnectionStringKey = "ConnectionString";
 		private const string SchemaNameKey = "SchemaName";
 		private const string TableNameKey = "TableName";
-		internal const string SetToNullAfterPreparingConfigSetupForDBTests = "This test requires database server to be setup";
+		//internal const string SetToNullAfterPreparingConfigSetupForDBTests = "This test requires database server to be setup";
 
 		public IOptions<MySqlCacheOptions> Options { get; private set; }
 
+		private static IConfiguration _configuration;
+		internal static IConfiguration Configuration
+		{
+			get
+			{
+				if (_configuration == null)
+				{
+					var configurationBuilder = new ConfigurationBuilder();
+					configurationBuilder
+						.AddJsonFile("config.json")
+						.AddEnvironmentVariables()
+#if DEBUG
+						.AddUserSecrets(typeof(DatabaseOptionsFixture).Assembly)
+#endif
+						;
+					var configuration = configurationBuilder.Build();
+					_configuration = configuration;
+				}
+
+				return _configuration;
+			}
+		}
+
 		public DatabaseOptionsFixture()
 		{
-			var configurationBuilder = new ConfigurationBuilder();
-			configurationBuilder
-				.AddJsonFile("config.json")
-				.AddEnvironmentVariables();
-
-			var configuration = configurationBuilder.Build();
-
 			Options = new MySqlCacheOptions()
 			{
-				TableName = configuration[TableNameKey],
-				SchemaName = configuration[SchemaNameKey],
-				ConnectionString = configuration[ConnectionStringKey],
-				ReadConnectionString = configuration[ReadConnectionStringKey],
-				WriteConnectionString = configuration[WriteConnectionStringKey]
+				TableName = Configuration[TableNameKey],
+				SchemaName = Configuration[SchemaNameKey],
+				ConnectionString = Configuration[ConnectionStringKey],
+				ReadConnectionString = Configuration[ReadConnectionStringKey],
+				WriteConnectionString = Configuration[WriteConnectionStringKey]
 			};
 
 			EnsureDBCreated().Wait();
