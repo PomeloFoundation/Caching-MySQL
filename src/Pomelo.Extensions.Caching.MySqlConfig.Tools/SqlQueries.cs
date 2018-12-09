@@ -1,11 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using System;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
-	public class MySqlQueries
+	internal class MySqlQueries
 	{
 		public const string CreateTableFormat =
 			// The index key prefix length limit is 767 bytes for InnoDB tables that use the REDUNDANT or COMPACT row format.

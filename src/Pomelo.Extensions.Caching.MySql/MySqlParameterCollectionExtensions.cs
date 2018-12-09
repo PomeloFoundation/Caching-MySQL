@@ -1,7 +1,7 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
-using Pomelo.Data.MySql;
+using MySql.Data.MySqlClient;
 using System;
 
 namespace Pomelo.Extensions.Caching.MySql
@@ -9,7 +9,7 @@ namespace Pomelo.Extensions.Caching.MySql
 	/// <summary>
 	/// TODO: make this class internal again
 	/// </summary>
-	public static class MySqlParameterCollectionExtensions
+	internal static class MySqlParameterCollectionExtensions
     {
         // For all values where the length is less than the below value, try setting the size of the
         // parameter for better performance.

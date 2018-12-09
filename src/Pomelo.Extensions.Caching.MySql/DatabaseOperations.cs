@@ -1,9 +1,9 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
-using Pomelo.Data.MySql;
+using MySql.Data.MySqlClient;
 using System;
 using System.Data;
 using System.Linq;
@@ -363,14 +363,7 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		protected bool IsDuplicateKeyException(MySqlException ex)
 		{
-			if (ex.Data != null)
-			{
-				if (ex.Data is MySqlError)
-					return ex.Data.Cast<MySqlError>().Any(error => error.Code == DuplicateKeyErrorId);
-				else if (ex.Number == DuplicateKeyErrorId)
-					return true;
-			}
-			return false;
+			return ex.Number == DuplicateKeyErrorId;
 		}
 
 		protected DateTimeOffset? GetAbsoluteExpiration(DateTimeOffset utcNow, DistributedCacheEntryOptions options)

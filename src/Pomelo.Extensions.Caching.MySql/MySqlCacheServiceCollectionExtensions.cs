@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.Caching.Distributed;
 using Pomelo.Extensions.Caching.MySql;
@@ -40,7 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
 		// to enable unit testing
 		/// TODO: make this internal again
-		public static void AddMySqlCacheServices(IServiceCollection services)
+		internal static void AddMySqlCacheServices(IServiceCollection services)
         {
             services.Add(ServiceDescriptor.Singleton<IDistributedCache, MySqlCache>());
         }

@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) Pomelo Foundation. All rights reserved.
+// Licensed under the MIT License
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +23,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			MySqlServerCachingServicesExtensions.AddMySqlCacheServices(services);
 
 			// Assert
-			Assert.Equal(1, services.Count);
+			Assert.True(1 == services?.Count);
 			var serviceDescriptor = services[0];
 			Assert.Equal(typeof(IDistributedCache), serviceDescriptor.ServiceType);
 			Assert.Equal(typeof(MySqlCache), serviceDescriptor.ImplementationType);
