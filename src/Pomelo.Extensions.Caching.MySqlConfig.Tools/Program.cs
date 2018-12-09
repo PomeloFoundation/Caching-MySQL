@@ -2,7 +2,6 @@
 // Licensed under the MIT License
 
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
@@ -17,14 +16,8 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 		private string _databaseName = null;
 		private string _tableName = null;
 
-		private LoggerFactory _loggerFactory;
-		private readonly ILogger _logger;
-
 		public Program()
 		{
-			_loggerFactory = new LoggerFactory();
-			_loggerFactory.AddConsole();
-			_logger = _loggerFactory.CreateLogger<Program>();
 		}
 
 		public static int Main(string[] args)
@@ -64,7 +57,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						|| string.IsNullOrEmpty(databaseNameArg.Value)
 						|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
-							_logger.LogWarning("Invalid input");
+							await Console.Error.WriteLineAsync("Invalid input");
 							app.ShowHelp();
 							return 2;
 						}
@@ -88,7 +81,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			}
 			catch (Exception exception)
 			{
-				_logger.LogCritical("An error occurred. {ErrorMessage}", exception.Message);
+				Console.Error.WriteLine($"An error occurred. {exception.Message}");
 				return 1;
 			}
 		}
@@ -108,7 +101,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					{
 						if (await reader.ReadAsync(token))
 						{
-							_logger.LogWarning(
+							Console.Error.WriteLine(
 								$"Table '{_tableName}' from database '{_databaseName}' already exists. " +
 								"Provide a different table name and try again.");
 							return 1;
@@ -134,13 +127,12 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 						transaction.Commit();
 
-						_logger.LogInformation("Table and index were created successfully.");
+						await Console.Out.WriteLineAsync("Table and index were created successfully.");
 					}
 					catch (Exception ex)
 					{
-						_logger.LogError(
-							"An error occurred while trying to create the table and index. {ErrorMessage}",
-							ex.Message);
+						await Console.Error.WriteLineAsync(
+							$"An error occurred while trying to create the table and index. {ex.Message}");
 						transaction.Rollback();
 
 						return 1;
@@ -174,7 +166,6 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 				if (disposing)
 				{
 					// TODO: dispose managed state (managed objects).
-					_loggerFactory.Dispose();
 				}
 
 				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

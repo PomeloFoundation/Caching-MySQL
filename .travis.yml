@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 2.0.0
+dotnet: 2.1.403
 dist: trusty
 addons:
   apt:
@@ -25,7 +25,6 @@ branches:
     - release
     - dev
     - appveyor
-    - 2.0.0-preview
     - /^(.*\/)?ci-.*$/
     - /^rel\/.*/
 before_install:
