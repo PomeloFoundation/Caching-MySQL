@@ -752,6 +752,33 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 			await cache.SetAsync(key, expectedValue, options);
 		}
+		
+		[IgnoreWhenNoSqlSetupFact]
+		public async Task DeleteExpiredCacheItems()
+		{
+			// Arrange
+			var key = Guid.NewGuid().ToString();
+			var testClock = new TestClock();
+			var sqlServerCache = GetCache(testClock);
+			await sqlServerCache.SetAsync(
+				key,
+				Encoding.UTF8.GetBytes("Small expiration time element"),
+				new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMilliseconds(250)));
+
+			// Act
+			testClock.Add(TimeSpan.FromMilliseconds(100));
+
+			// Assert
+			var cacheItemInfo = await sqlServerCache.GetAsync(key);
+			Assert.NotNull(cacheItemInfo);
+
+			// Act
+			testClock.Add(TimeSpan.FromMilliseconds(200));
+
+			// Assert
+			cacheItemInfo = await sqlServerCache.GetAsync(key);
+			Assert.Null(cacheItemInfo);
+		}
 
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{

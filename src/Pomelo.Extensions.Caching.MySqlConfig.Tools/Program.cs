@@ -5,6 +5,7 @@ using Microsoft.Extensions.CommandLineUtils;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,9 +37,19 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					"to be used for distributed caching";
 
 				var app = new CommandLineApplication();
+				app.FullName = "MySQL Server Cache Command Line Tool";
 				app.Name = "dotnet-mysql-cache";
 				app.Description = description;
-
+				app.ShortVersionGetter = () =>
+				{
+					var assembly = typeof(Program).GetTypeInfo().Assembly;
+					var infoVersion = assembly
+						?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+						?.InformationalVersion;
+					return string.IsNullOrWhiteSpace(infoVersion)
+						? assembly?.GetName().Version.ToString()
+						: infoVersion;
+				};
 				app.HelpOption("-?|-h|--help");
 
 				app.Command("create", command =>
