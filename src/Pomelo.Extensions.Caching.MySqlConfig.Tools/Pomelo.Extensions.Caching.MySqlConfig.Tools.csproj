@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <Description>Command line tool to create tables and indexes in a MySql Server database for distributed caching.</Description>
-    <VersionPrefix>1.0.0-preview1-final</VersionPrefix>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -14,16 +13,18 @@
     <PackageTags>cache;distributedcache;mysql</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/PomeloFoundation/Caching-MySQL</RepositoryUrl>
-    <!--<RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>-->
     <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>Pomelo.Extensions.Caching.MySqlConfig.Tools</RootNamespace>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <AssemblyVersion>2.0.2.0</AssemblyVersion>
+    <IsPackable>true</IsPackable>
+    <ToolCommandName>dotnet-mysql-cache</ToolCommandName>
+    <PackAsTool>true</PackAsTool>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -34,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-	<PackageReference Include="MySqlConnector" Version="0.49.3" />
+	  <PackageReference Include="MySqlConnector" Version="0.49.3" />
   </ItemGroup>
 
 </Project>
