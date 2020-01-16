@@ -5,6 +5,7 @@ branches:
     - master
     - release
     - dev
+    - 2.0.0-preview
     - /^(.*\/)?ci-.*$/
     - /^rel\/.*/
 build_script:
@@ -12,4 +13,4 @@ build_script:
 clone_depth: 1
 test: off
 deploy: off
-os: Visual Studio 2017
+os: Visual Studio 2019
