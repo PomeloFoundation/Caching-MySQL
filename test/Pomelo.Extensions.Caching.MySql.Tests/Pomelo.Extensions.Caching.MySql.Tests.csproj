@@ -1,13 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>netcoreapp2.2</TargetFramework>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
-	<PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
-	<UserSecretsId>Caching-MySQL-88E451EA-603F-417A-A190-62081E1B3A8C</UserSecretsId>
-	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-	<Version>2.0.2</Version>
+	  <TargetFramework>netcoreapp3.1</TargetFramework>
+	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
+	  <PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
+	  <UserSecretsId>Caching-MySQL-88E451EA-603F-417A-A190-62081E1B3A8C</UserSecretsId>
+	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <Version>2.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,23 +17,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Content Include="config.json" CopyToOutputDirectory="PreserveNewest" />
+	  <Content Include="config.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-	<ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
-	<ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
+	  <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
+	  <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.4" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-		<PackageReference Include="Moq" Version="4.13.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
+		<PackageReference Include="Moq" Version="4.13.1" />
   </ItemGroup>
   
 </Project>
