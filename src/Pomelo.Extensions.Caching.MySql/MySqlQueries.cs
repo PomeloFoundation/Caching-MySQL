@@ -52,7 +52,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		public MySqlQueries(string schemaName, string tableName)
 		{
 			var tableNameWithSchema = string.Format(
-				"{0}.{1}", DelimitIdentifier(schemaName), DelimitIdentifier(tableName));
+				"{0}.{1}", EscapeIdentifier(DelimitIdentifier(schemaName)), EscapeIdentifier(DelimitIdentifier(tableName)));
 
 			// when retrieving an item, we do an UPDATE first and then a SELECT
 			GetCacheItem = string.Format(UpdateCacheItemFormat + GetCacheItemFormat, tableNameWithSchema);
@@ -84,6 +84,11 @@ namespace Pomelo.Extensions.Caching.MySql
 		private string EscapeLiteral(string literal)
 		{
 			return literal.Replace("'", "''");
+		}
+
+		private string EscapeIdentifier(string identifier)
+		{
+			return $"`{identifier}`";
 		}
 	}
 }
