@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
