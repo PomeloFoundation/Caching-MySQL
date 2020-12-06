@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>netcoreapp3.1</TargetFramework>
+	  <TargetFramework>net5.0</TargetFramework>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	  <AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
 	  <PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
@@ -9,7 +9,7 @@
 	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Version>2.0.3</Version>
+    <Version>2.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,14 +26,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
-		<PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
+		<PackageReference Include="Moq" Version="4.15.2" />
   </ItemGroup>
   
 </Project>

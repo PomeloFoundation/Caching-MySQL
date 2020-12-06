@@ -2,7 +2,7 @@
 // Licensed under the MIT License
 
 using Microsoft.Extensions.CommandLineUtils;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System;
 using System.Data;
 using System.Reflection;

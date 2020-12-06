@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System;
 using System.Threading.Tasks;
 using Xunit;
