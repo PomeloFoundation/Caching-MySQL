@@ -1,7 +1,7 @@
 // Copyright (c) Pomelo Foundation. All rights reserved.
 // Licensed under the MIT License
 
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using System;
 
 namespace Pomelo.Extensions.Caching.MySql
