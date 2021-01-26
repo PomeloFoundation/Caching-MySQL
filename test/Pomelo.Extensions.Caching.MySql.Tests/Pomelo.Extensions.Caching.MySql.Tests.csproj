@@ -36,7 +36,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-		<PackageReference Include="Moq" Version="4.15.2" />
+		<PackageReference Include="Moq" Version="4.16.0" />
   </ItemGroup>
   
 </Project>
