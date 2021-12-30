@@ -1,10 +1,11 @@
-// Copyright (c) Pomelo Foundation. All rights reserved.
+﻿// Copyright (c) Pomelo Foundation. All rights reserved.
 // Licensed under the MIT License
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,11 +13,14 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 {
 	public class IgnoreWhenNoSqlSetupFactAttribute : FactAttribute
 	{
+		internal static bool IsSqlSetupInvalid =>
+			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
+			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
+			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]);
+
 		public IgnoreWhenNoSqlSetupFactAttribute()
 		{
-			if (string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
-				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
-				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]))
+			if (IgnoreWhenNoSqlSetupFactAttribute.IsSqlSetupInvalid)
 			{
 				Skip = "This test requires database server to be setup";
 			}
@@ -27,21 +31,32 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 	{
 		public IgnoreWhenNoSqlSetupTheoryAttribute()
 		{
-			if (string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
-				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
-				string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]))
+			if (IgnoreWhenNoSqlSetupFactAttribute.IsSqlSetupInvalid)
 			{
 				Skip = "This test requires database server to be setup";
 			}
 		}
 	}
 
-	public class DatabaseOptionsFixture : IDisposable
+	public class IgnoreWhenNotEnabledCreateDropTableTestingFactAttribute : FactAttribute
 	{
-		private const string ReadConnectionStringKey = "ReadConnectionString", WriteConnectionStringKey = "WriteConnectionString", ConnectionStringKey = "ConnectionString";
-		private const string SchemaNameKey = "SchemaName";
-		private const string TableNameKey = "TableName";
-		//internal const string SetToNullAfterPreparingConfigSetupForDBTests = "This test requires database server to be setup";
+		public IgnoreWhenNotEnabledCreateDropTableTestingFactAttribute()
+		{
+			string temp = DatabaseOptionsFixture.Configuration["TestCreateDropTable"];
+			var testCreateDropTable = !string.IsNullOrEmpty(temp) && temp.Equals(true.ToString(), StringComparison.InvariantCultureIgnoreCase);
+
+			if (!testCreateDropTable || IgnoreWhenNoSqlSetupFactAttribute.IsSqlSetupInvalid)
+			{
+				Skip = "CREATE/DROP table test disabled";
+			}
+		}
+	}
+
+	public class ConfigOptionsFixture
+	{
+		protected const string ReadConnectionStringKey = "ReadConnectionString", WriteConnectionStringKey = "WriteConnectionString", ConnectionStringKey = "ConnectionString";
+		protected const string SchemaNameKey = "SchemaName";
+		protected const string TableNameKey = "TableName";
 
 		public IOptions<MySqlCacheOptions> Options { get; private set; }
 
@@ -77,7 +92,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 		}
 
-		public DatabaseOptionsFixture()
+		public ConfigOptionsFixture()
 		{
 			Options = new MySqlCacheOptions()
 			{
@@ -87,34 +102,44 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				ReadConnectionString = Configuration[ReadConnectionStringKey],
 				WriteConnectionString = Configuration[WriteConnectionStringKey]
 			};
+		}
+	}
 
-			EnsureDBCreated().Wait();
+	public class DatabaseOptionsFixture : ConfigOptionsFixture, IDisposable
+	{
+		public DatabaseOptionsFixture() : base()
+		{
+			EnsureCreated();
 		}
 
-		private async Task EnsureDBCreated()
+		private void EnsureCreated()
 		{
+			if (string.IsNullOrEmpty(Options.Value.WriteConnectionString)) return;
+
 			string create_table = MySqlConfig.Tools.MySqlQueries.CreateTableFormat;
 
 			using (var connection = new MySqlConnection(Options.Value.WriteConnectionString))
 			{
 				using (var command = new MySqlCommand(string.Format(create_table, Options.Value.TableName), connection))
 				{
-					await connection.OpenAsync();
+					connection.Open();
 
-					await command.ExecuteNonQueryAsync();
+					command.ExecuteNonQuery();
 				}
 			}
 		}
 
-		private async Task ClearAllDatabaseEntriesAsync()
+		private void ClearAllDatabaseEntries()
 		{
+			if (string.IsNullOrEmpty(Options.Value.WriteConnectionString)) return;
+
 			using (var connection = new MySqlConnection(Options.Value.WriteConnectionString))
 			{
 				using (var command = new MySqlCommand($"DELETE FROM {Options.Value.TableName}", connection))
 				{
-					await connection.OpenAsync();
+					connection.Open();
 
-					await command.ExecuteNonQueryAsync();
+					command.ExecuteNonQuery();
 				}
 			}
 		}
@@ -129,7 +154,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				if (disposing)
 				{
 					// TODO: dispose managed state (managed objects).
-					ClearAllDatabaseEntriesAsync().Wait();
+					ClearAllDatabaseEntries();
 				}
 
 				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

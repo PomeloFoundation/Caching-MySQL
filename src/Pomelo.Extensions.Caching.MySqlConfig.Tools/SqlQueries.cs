@@ -22,8 +22,8 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 				"KEY `Index_ExpiresAtTime` (`ExpiresAtTime`)" +
 			")";
 
-		private const string CreateNonClusteredIndexOnExpirationTimeFormat
-			= "CREATE NONCLUSTERED INDEX Index_ExpiresAtTime ON {0}(ExpiresAtTime)";
+		//private const string CreateNonClusteredIndexOnExpirationTimeFormat
+		//	= "CREATE NONCLUSTERED INDEX Index_ExpiresAtTime ON {0}(ExpiresAtTime)";
 
 		private const string TableInfoFormat =
 			 "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE " +
@@ -45,15 +45,15 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			var tableNameWithDatabase = string.Format(
 				"{1}", DelimitIdentifier(databaseName), DelimitIdentifier(tableName));
 			CreateTable = string.Format(CreateTableFormat, tableNameWithDatabase);
-			CreateNonClusteredIndexOnExpirationTime = string.Format(
-				CreateNonClusteredIndexOnExpirationTimeFormat,
-				tableNameWithDatabase);
+			//CreateNonClusteredIndexOnExpirationTime = string.Format(
+			//	CreateNonClusteredIndexOnExpirationTimeFormat,
+			//	tableNameWithDatabase);
 			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(databaseName), EscapeLiteral(tableName));
 		}
 
 		public string CreateTable { get; }
 
-		public string CreateNonClusteredIndexOnExpirationTime { get; }
+		//public string CreateNonClusteredIndexOnExpirationTime { get; }
 
 		public string TableInfo { get; }
 

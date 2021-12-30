@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
-	public class Program : IDisposable
+	public class Program
 	{
 		private string _connectionString = null;
 		private string _databaseName = null;
@@ -23,10 +23,9 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 		public static int Main(string[] args)
 		{
-			using (var p = new Program())
-			{
-				return p.Run(args);
-			}
+			var p = new Program();
+
+			return p.Run(args);
 		}
 
 		public int Run(string[] args)
@@ -166,40 +165,5 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					$"Invalid MySql server connection string '{_connectionString}'. {ex.Message}", ex);
 			}
 		}
-
-		#region IDisposable Support
-		private bool disposedValue = false; // To detect redundant calls
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposedValue)
-			{
-				if (disposing)
-				{
-					// TODO: dispose managed state (managed objects).
-				}
-
-				// TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-				// TODO: set large fields to null.
-
-				disposedValue = true;
-			}
-		}
-
-		// TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-		// ~Program() {
-		//   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-		//   Dispose(false);
-		// }
-
-		// This code added to correctly implement the disposable pattern.
-		public void Dispose()
-		{
-			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-			Dispose(true);
-			// TODO: uncomment the following line if the finalizer is overridden above.
-			// GC.SuppressFinalize(this);
-		}
-		#endregion
 	}
 }
