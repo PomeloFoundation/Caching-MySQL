@@ -25,6 +25,8 @@
     <IsPackable>true</IsPackable>
     <ToolCommandName>dotnet-mysql-cache</ToolCommandName>
     <PackAsTool>true</PackAsTool>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Pomelo.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
