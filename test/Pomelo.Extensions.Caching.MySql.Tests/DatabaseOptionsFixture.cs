@@ -1,4 +1,4 @@
-﻿// Copyright (c) Pomelo Foundation. All rights reserved.
+// Copyright (c) Pomelo Foundation. All rights reserved.
 // Licensed under the MIT License
 
 using Microsoft.Extensions.Configuration;
@@ -54,12 +54,21 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				{
 					var configurationBuilder = new ConfigurationBuilder();
 					configurationBuilder
-						.AddJsonFile("config.json")
-						.AddEnvironmentVariables()
+						//.AddJsonFile("config.json")
+						.AddInMemoryCollection(new Dictionary<string, string>
+						{
+							//{ "ConnectionString", "server=127.0.0.1;user id=SessionTest;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
+							//{ "ReadConnectionString", "server=127.0.0.1;user id=SessionTestRead;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
+							//{ "WriteConnectionString", "server=127.0.0.1;user id=SessionTest;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
+							{ "SchemaName", "SessionTest" },
+							{ "TableName", "CacheTest" },
+							{ "TestCreateDropTable", "false" }
+						})
 #if DEBUG
-						.AddUserSecrets(typeof(DatabaseOptionsFixture).Assembly)
+						.AddUserSecrets(typeof(DatabaseOptionsFixture).Assembly, true)
 #endif
-						;
+						.AddEnvironmentVariables();
+
 					var configuration = configurationBuilder.Build();
 					_configuration = configuration;
 				}
