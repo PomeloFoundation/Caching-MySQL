@@ -12,7 +12,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			// That is why we are using 'CHARACTER SET ascii COLLATE ascii_bin' column and index
 			// https://dev.mysql.com/doc/refman/5.7/en/innodb-restrictions.html
 			// - Add collation to the key column to make it case-sensitive
-			"CREATE TABLE IF NOT EXISTS `{0}` (" +
+			"CREATE TABLE IF NOT EXISTS {0} (" +
 				"`Id` varchar(449) CHARACTER SET ascii COLLATE ascii_bin NOT NULL," +
 				"`AbsoluteExpiration` datetime(6) DEFAULT NULL," +
 				"`ExpiresAtTime` datetime(6) NOT NULL," +
@@ -43,7 +43,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 			}
 
 			var tableNameWithDatabase = string.Format(
-				"{1}", DelimitIdentifier(databaseName), DelimitIdentifier(tableName));
+				"{0}.{1}", DelimitIdentifier(databaseName), DelimitIdentifier(tableName));
 			CreateTable = string.Format(CreateTableFormat, tableNameWithDatabase);
 			//CreateNonClusteredIndexOnExpirationTime = string.Format(
 			//	CreateNonClusteredIndexOnExpirationTimeFormat,
@@ -60,7 +60,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 		// From EF's SqlServerQuerySqlGenerator
 		private string DelimitIdentifier(string identifier)
 		{
-			return identifier;
+			return $"`{identifier}`";
 		}
 
 		private string EscapeLiteral(string literal)

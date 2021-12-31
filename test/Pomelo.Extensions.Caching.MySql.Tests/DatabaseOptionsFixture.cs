@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
@@ -14,9 +13,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 	public class IgnoreWhenNoSqlSetupFactAttribute : FactAttribute
 	{
 		internal static bool IsSqlSetupInvalid =>
-			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ConnectionString"]) &&
-			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["ReadConnectionString"]) &&
-			string.IsNullOrEmpty(DatabaseOptionsFixture.Configuration["WriteConnectionString"]);
+			string.IsNullOrEmpty(ConfigOptionsFixture.Configuration["ConnectionString"]) &&
+			string.IsNullOrEmpty(ConfigOptionsFixture.Configuration["ReadConnectionString"]) &&
+			string.IsNullOrEmpty(ConfigOptionsFixture.Configuration["WriteConnectionString"]);
 
 		public IgnoreWhenNoSqlSetupFactAttribute()
 		{
@@ -42,7 +41,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 	{
 		public IgnoreWhenNotEnabledCreateDropTableTestingFactAttribute()
 		{
-			string temp = DatabaseOptionsFixture.Configuration["TestCreateDropTable"];
+			string temp = ConfigOptionsFixture.Configuration["TestCreateDropTable"];
 			var testCreateDropTable = !string.IsNullOrEmpty(temp) && temp.Equals(true.ToString(), StringComparison.InvariantCultureIgnoreCase);
 
 			if (!testCreateDropTable || IgnoreWhenNoSqlSetupFactAttribute.IsSqlSetupInvalid)
@@ -69,7 +68,6 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				{
 					var configurationBuilder = new ConfigurationBuilder();
 					configurationBuilder
-						//.AddJsonFile("config.json")
 						.AddInMemoryCollection(new Dictionary<string, string>
 						{
 							//{ "ConnectionString", "server=127.0.0.1;user id=SessionTest;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
@@ -116,7 +114,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		{
 			if (string.IsNullOrEmpty(Options.Value.WriteConnectionString)) return;
 
-			string create_table = MySqlConfig.Tools.MySqlQueries.CreateTableFormat;
+			string create_table = new MySqlConfig.Tools.MySqlQueries(Options.Value.SchemaName, Options.Value.TableName).CreateTable;
 
 			using (var connection = new MySqlConnection(Options.Value.WriteConnectionString))
 			{

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
 {
-	public class MySqlCacheServicesExtensionsTest
+	public class ServicesExtensionsTests
 	{
 		[Fact]
 		public void AddDistributedSqlServerCache_AddsAsSingleRegistrationService()

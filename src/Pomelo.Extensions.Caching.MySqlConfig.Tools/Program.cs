@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 {
+	/// <summary>
+	/// Based (if not entirely) of off https://github.com/dotnet/aspnetcore/blob/main/src/Tools/dotnet-sql-cache/src/Program.cs
+	/// </summary>
 	public class Program
 	{
 		private string _connectionString = null;
@@ -60,6 +63,9 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				cliApp.Command("create", command =>
 				{
+					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Out = Out;
+
 					command.Description = description;
 					var connectionStringArg = command.Argument(
 						"[connectionString]",
@@ -71,11 +77,11 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					command.OnExecute(async () =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
-						|| string.IsNullOrEmpty(databaseNameArg.Value)
-						|| string.IsNullOrEmpty(tableNameArg.Value))
+							|| string.IsNullOrEmpty(databaseNameArg.Value)
+							|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
-							cliApp.ShowHelp("create");
+							cliApp.ShowHelp(command.Name);
 							return 2;
 						}
 
@@ -84,6 +90,33 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						_tableName = tableNameArg.Value;
 
 						return await CreateTableAndIndexes();
+					});
+				});
+
+				cliApp.Command("script", command =>
+				{
+					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Out = Out;
+
+					command.Description = "Generate creation script";
+					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
+					command.HelpOption("-?|-h|--help");
+
+					command.OnExecute(async () =>
+					{
+						if (string.IsNullOrEmpty(databaseNameArg.Value)
+							|| string.IsNullOrEmpty(tableNameArg.Value))
+						{
+							await Error.WriteLineAsync("Invalid input");
+							cliApp.ShowHelp(command.Name);
+							return 2;
+						}
+
+						_databaseName = databaseNameArg.Value;
+						_tableName = tableNameArg.Value;
+
+						return await GenerateScript();
 					});
 				});
 
@@ -96,9 +129,9 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				return cliApp.Execute(args);
 			}
-			catch (Exception exception)
+			catch (Exception ex)
 			{
-				Error.WriteLine($"An error occurred. {exception.Message}");
+				Error.WriteLine($"An error occurred. {ex.Message}");
 				return 1;
 			}
 		}
@@ -155,6 +188,25 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						return 1;
 					}
 				}
+			}
+
+			return 0;
+		}
+
+		private async Task<int> GenerateScript(CancellationToken token = default(CancellationToken))
+		{
+			try
+			{
+				var sqlQueries = new MySqlQueries(_databaseName, _tableName);
+				string cmd = sqlQueries.CreateTable;
+
+				await Out.WriteLineAsync($"{Environment.NewLine}{cmd}{Environment.NewLine}");
+			}
+			catch (Exception ex)
+			{
+				await Error.WriteLineAsync($"An error occurred while trying to create the table and index. {ex.Message}");
+
+				return 1;
 			}
 
 			return 0;

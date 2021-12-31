@@ -20,29 +20,32 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private Program SutSetup(out StringBuilder output, out StringBuilder error)
 		{
-			var sb_output = new StringBuilder();
-			var sw_output = new StringWriter(sb_output);
-			var sb_error = new StringBuilder();
-			var sw_error = new StringWriter(sb_error);
+			output = new StringBuilder();
+			error = new StringBuilder();
+			var sw_output = new StringWriter(output);
+			var sw_error = new StringWriter(error);
 
 			Program toolApp = new Program();
 
 			toolApp.Out = sw_output;
 			toolApp.Error = sw_error;
 
-			output = sb_output;
-			error = sb_error;
-
 			return toolApp;
 		}
 
 		private void SutTearDown(Program toolApp)
 		{
-			toolApp.Out.Flush();
-			toolApp.Out.Dispose();
+			if (toolApp.Out != Console.Out)
+			{
+				toolApp.Out.Flush();
+				toolApp.Out.Dispose();
+			}
 
-			toolApp.Error.Flush();
-			toolApp.Error.Dispose();
+			if (toolApp.Error != Console.Error)
+			{
+				toolApp.Error.Flush();
+				toolApp.Error.Dispose();
+			}
 		}
 
 		private async Task DropCreatedTable(string temp_tab_name)
@@ -83,11 +86,61 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 		}
 
+		[Fact]
+		public void CreateHelp()
+		{
+			// Arrange
+			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
+			try
+			{
+				string[] args = new[] { "create", "--help" };
+
+				// Act
+				int ret_val = toolApp.Run(args);
+
+				// Assert
+				Assert.True(output.Length > 0);
+				Assert.True(error.Length <= 0);
+				string name = toolApp.GetType().Assembly.GetName().Name;
+				Assert.Contains($"Usage: {name} create [arguments] [options]", output.ToString());
+			}
+			finally
+			{
+				SutTearDown(toolApp);
+			}
+		}
+
+		[Fact]
+		public void ScriptHelp()
+		{
+			// Arrange
+			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
+			try
+			{
+				string[] args = new[] { "script", "--help" };
+
+				// Act
+				int ret_val = toolApp.Run(args);
+
+				// Assert
+				Assert.True(output.Length > 0);
+				Assert.True(error.Length <= 0);
+				string name = toolApp.GetType().Assembly.GetName().Name;
+				Assert.Contains($"Usage: {name} script [arguments] [options]", output.ToString());
+			}
+			finally
+			{
+				SutTearDown(toolApp);
+			}
+		}
+
 		[Theory]
 		[InlineData("create")]
 		[InlineData("create", "conn")]
 		[InlineData("create", "conn", "dbase")]
-		public void Create_NotEnoughParams(params string[] args)
+		[InlineData("script", "dbase")]
+		[InlineData("script")]
+		public void NotEnoughParams(params string[] args)
 		{
 			// Arrange
 			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
@@ -156,6 +209,30 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				Assert.Equal("Table and index were created successfully." + Environment.NewLine, output.ToString());
 
 				await DropCreatedTable(temp_tab_name);
+			}
+			finally
+			{
+				SutTearDown(toolApp);
+			}
+		}
+
+		[Fact]
+		public void Script_Ok()
+		{
+			// Arrange
+			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
+			try
+			{
+				string[] args = new[] { "script", "mySchemaName", "myTableName" };
+
+				// Act
+				int ret_val = toolApp.Run(args);
+
+				// Assert
+				Assert.Equal(0, ret_val);
+				Assert.True(output.Length > 0);
+				Assert.True(error.Length <= 0);
+				Assert.Contains("CREATE TABLE IF NOT EXISTS `mySchemaName`.`myTableName`", output.ToString());
 			}
 			finally
 			{
