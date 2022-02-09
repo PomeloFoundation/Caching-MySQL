@@ -15,11 +15,11 @@ using Xunit;
 
 namespace Pomelo.Extensions.Caching.MySql.Tests
 {
-	public class MySqlCacheWithDatabaseTest : IClassFixture<DatabaseOptionsFixture>, IDisposable
+	public class DatabaseTests : IClassFixture<DatabaseOptionsFixture>, IDisposable
 	{
 		private DatabaseOptionsFixture _databaseOptionsFixture;
 
-		public MySqlCacheWithDatabaseTest(DatabaseOptionsFixture databaseOptionsFixture)
+		public DatabaseTests(DatabaseOptionsFixture databaseOptionsFixture)
 		{
 			_databaseOptionsFixture = databaseOptionsFixture;
 		}

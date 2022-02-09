@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>net5.0</TargetFramework>
+	  <TargetFramework>net6.0</TargetFramework>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	  <AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
 	  <PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
@@ -19,25 +19,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <Content Include="config.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
 	  <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySqlConfig.Tools\Pomelo.Extensions.Caching.MySqlConfig.Tools.csproj" />
 	  <ProjectReference Include="..\..\src\Pomelo.Extensions.Caching.MySql\Pomelo.Extensions.Caching.MySql.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
 		<PackageReference Include="Moq" Version="4.16.1" />
   </ItemGroup>
   
