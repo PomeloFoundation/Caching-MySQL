@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Command line tool to create tables and indexes in a MySql Server database for distributed caching.</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-	  <PackageReference Include="MySqlConnector" Version="2.1.2" />
+	  <PackageReference Include="MySqlConnector" Version="2.2.2" />
   </ItemGroup>
 
 </Project>
