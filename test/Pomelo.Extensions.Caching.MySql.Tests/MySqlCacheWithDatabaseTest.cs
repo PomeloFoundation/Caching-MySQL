@@ -239,26 +239,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			// Assert
 			Assert.Null(value);
 		}
-
-		[IgnoreWhenNoSqlSetupFact]
-		public async Task ThrowsException_OnNoSlidingOrAbsoluteExpirationOptions()
-		{
-			// Arrange
-			var key = Guid.NewGuid().ToString();
-			var sqlServerCache = GetCache();
-			var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
-
-			// Act & Assert
-			var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-			{
-				return sqlServerCache.SetAsync(
-					key,
-					expectedValue,
-					new DistributedCacheEntryOptions());
-			});
-			Assert.Equal("Either absolute or sliding expiration needs to be provided.", exception.Message);
-		}
-
+        
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task DoesNotThrowException_WhenOnlyAbsoluteExpirationSupplied_AbsoluteExpirationRelativeToNow()
 		{
@@ -379,6 +360,24 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				absoluteExpiration: absoluteExpiration,
 				expectedExpirationTime: absoluteExpiration);
 		}
+        
+        [IgnoreWhenNoSqlSetupFact]
+        public async Task SetCacheItem_Uses_DefaultSlidingExpiration_If_NoSlidingOrAbsoluteExpirationSupplied()
+        {
+          // Arrange
+          var key = Guid.NewGuid().ToString();
+          var sqlServerCache = GetCache();
+          var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
+            
+          await sqlServerCache.SetAsync(
+            key,
+            expectedValue,
+            new DistributedCacheEntryOptions());
+            
+          var cacheItem = await GetCacheItemFromDatabaseAsync(key);
+          Assert.NotNull(cacheItem);
+          Assert.Equal(cacheItem.SlidingExpirationInSeconds, _databaseOptionsFixture.Options.Value.DefaultSlidingExpiration);
+        }
 
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task ExtendsExpirationTime_ForSlidingExpiration()
@@ -779,7 +778,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			cacheItemInfo = await sqlServerCache.GetAsync(key);
 			Assert.Null(cacheItemInfo);
 		}
-
+        
+      
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{
 			var options = _databaseOptionsFixture.Options.Value;
