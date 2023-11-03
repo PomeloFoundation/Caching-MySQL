@@ -742,10 +742,10 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				SlidingExpirationInSeconds = TimeSpan.FromSeconds(10)
 			};
 
-			var exception = await Assert.ThrowsAsync<MySqlException>((Func<ValueTask>)(async () =>
+			var exception = await Assert.ThrowsAsync<MySqlException>(async () =>
 			{
 				await SetCacheItemFromDatabaseAsync(key, value);
-			}));
+			});
 			Assert.NotNull(exception);
 			Assert.Equal(1062, exception.Number);
 
