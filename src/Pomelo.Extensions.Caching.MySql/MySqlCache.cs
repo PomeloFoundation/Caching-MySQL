@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Pomelo.Extensions.Caching.MySql
 {
 	/// <summary>
-	/// Distributed cache implementation using Microsoft MySql Server database.
+	/// Distributed cache implementation using MySQL Server database.
 	/// </summary>
 	public class MySqlCache : IDistributedCache
 	{

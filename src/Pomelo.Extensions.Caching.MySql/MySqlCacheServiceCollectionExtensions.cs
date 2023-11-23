@@ -7,14 +7,14 @@ using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-	/// <summary>
-	/// Extension methods for setting up Microsoft MySql Server distributed cache services in an <see cref="IServiceCollection" />.
-	/// </summary>
-	/// TODO: make this internal again
-	public static class MySqlServerCachingServicesExtensions
+    /// <summary>
+    /// Extension methods for setting up MySQL Server distributed cache services in an <see cref="IServiceCollection" />.
+    /// </summary>
+    /// TODO: make this internal again
+    public static class MySqlServerCachingServicesExtensions
     {
         /// <summary>
-        /// Adds Microsoft MySql Server distributed caching services to the specified <see cref="IServiceCollection" />.
+        /// Adds MySQL Server distributed caching services to the specified <see cref="IServiceCollection" />.
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
         /// <param name="setupAction">An <see cref="Action{MySqlCacheOptions}"/> to configure the provided <see cref="MySqlCacheOptions"/>.</param>
