@@ -70,14 +70,14 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					var connectionStringArg = command.Argument(
 						"[connectionString]",
 						"The connection string to connect to the database.");
-					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
 					command.OnExecute(async () =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
-							|| databaseNameArg.Value == null
 							|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
@@ -86,7 +86,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						}
 
 						_connectionString = connectionStringArg.Value;
-						_databaseName = databaseNameArg.Value;
+						_databaseName = databaseNameOpt.Value();
 						_tableName = tableNameArg.Value;
 
 						return await CreateTableAndIndexes();
@@ -99,21 +99,21 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					command.Out = Out;
 
 					command.Description = "Generate creation script";
-					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
 					command.OnExecute(async () =>
 					{
-						if (databaseNameArg.Value == null
-							|| string.IsNullOrEmpty(tableNameArg.Value))
+						if (string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
 							cliApp.ShowHelp(command.Name);
 							return 2;
 						}
 
-						_databaseName = databaseNameArg.Value;
+						_databaseName = databaseNameOpt.Value();
 						_tableName = tableNameArg.Value;
 
 						return await GenerateScript();
