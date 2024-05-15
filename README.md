@@ -8,10 +8,10 @@ Basing on https://learn.microsoft.com/en-us/aspnet/core/performance/caching/dist
 
 The Distributed MySQL Server Cache implementation (**AddDistributedMySqlCache**) allows the distributed cache to use a MySQL Server database as its backing store. To create a MySQL Server cached item table in a MySQL Server instance, you can use the `dotnet-mysql-cache` tool. The tool creates a table with the name and schema that you specify.
 
-Create a table in MySQL Server by running the `dotnet mysql-cache create` command. Provide the MySQL Server connection string, instance (for example `server=192.169.0.1`), database (for example, `databaseName`), and table name (for example, `NewTableName`):
+Create a table in MySQL Server by running the `dotnet mysql-cache create` command. Provide the MySQL Server connection string, instance (for example `server=192.169.0.1`), table name (for example, `NewTableName`) and optional database (for example, `MyDatabaseName`):
 
 ```dotnetcli
-dotnet mysql-cache create "server=192.169.0.1;user id=userName;password=P4ssword123!;port=3306;database=databaseName;Allow User Variables=True" databaseName "NewTableName"
+dotnet mysql-cache create "server=192.169.0.1;user id=userName;password=P4ssword123!;port=3306;database=MyDatabaseName;Allow User Variables=True" "NewTableName" --databaseName "MyDatabaseName"
 ```
 
 A message is logged to indicate that the tool was successful:
@@ -33,8 +33,8 @@ The example snippet how to implement MySql Server cache in `Program.cs`:
 builder.Services.AddDistributedMySqlCache(options =>
 {
     options.ConnectionString = builder.Configuration.GetConnectionString("DistCache_ConnectionString");
-    options.SchemaName = "databaseName";
-    options.TableName = "NewTableName";
+    options.SchemaName = "MyDatabaseName";  //optional
+    options.TableName = "NewTableName";     //required
 });
 ```
 
