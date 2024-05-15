@@ -92,8 +92,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		[Theory]
 		[InlineData(null, null, null)]
 		[InlineData("", "", "")]
-		public async Task AddDistributedSqlServerCache_BadOrEmptyConnectionStrings(string readConnectionString, string writeConnectionString,
-			string connectionString)
+		public async Task AddDistributedSqlServerCache_BadOrEmptyConnectionStrings(
+			string readConnectionString, string writeConnectionString, string connectionString)
 		{
 			// Arrange
 			var services = new ServiceCollection();

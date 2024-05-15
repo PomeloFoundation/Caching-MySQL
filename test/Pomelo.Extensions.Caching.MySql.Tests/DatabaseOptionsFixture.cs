@@ -73,7 +73,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 							//{ "ConnectionString", "server=127.0.0.1;user id=SessionTest;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
 							//{ "ReadConnectionString", "server=127.0.0.1;user id=SessionTestRead;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
 							//{ "WriteConnectionString", "server=127.0.0.1;user id=SessionTest;password=XXXXXXXXXX;persistsecurityinfo=True;port=3306;database=SessionTest;Allow User Variables=True" },
-							{ "SchemaName", "SessionTest" },
+							//{ "SchemaName", "SessionTest" },
 							{ "TableName", "CacheTest" },
 							{ "TestCreateDropTable", "false" }
 						})

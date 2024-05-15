@@ -63,7 +63,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				cliApp.Command("create", command =>
 				{
-					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
 					command.Out = Out;
 
 					command.Description = description;
@@ -77,7 +77,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 					command.OnExecute(async () =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
-							|| string.IsNullOrEmpty(databaseNameArg.Value)
+							|| databaseNameArg.Value == null
 							|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
@@ -95,7 +95,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				cliApp.Command("script", command =>
 				{
-					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
 					command.Out = Out;
 
 					command.Description = "Generate creation script";
@@ -105,7 +105,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 					command.OnExecute(async () =>
 					{
-						if (string.IsNullOrEmpty(databaseNameArg.Value)
+						if (databaseNameArg.Value == null
 							|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");

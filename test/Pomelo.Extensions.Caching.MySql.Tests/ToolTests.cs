@@ -50,10 +50,16 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		private async Task DropCreatedTable(string temp_tab_name)
 		{
+			var tableNameWithDatabase = string.Format("{0}`{1}`",
+				(string.IsNullOrEmpty(_fixture.Options.Value.SchemaName) ? "" : $"`{_fixture.Options.Value.SchemaName}`."),
+				temp_tab_name
+			);
+
 			using var connection = new MySqlConnection(_fixture.Options.Value.WriteConnectionString);
 			await connection.OpenAsync();
 			using var transaction = connection.BeginTransaction();
-			string cmd = $"DROP TABLE `{_fixture.Options.Value.SchemaName}`.`{temp_tab_name}`";
+
+			string cmd = $"DROP TABLE {tableNameWithDatabase}";
 			using var command = new MySqlCommand(cmd, connection, transaction);
 			await command.ExecuteNonQueryAsync();
 
@@ -216,14 +222,20 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 		}
 
-		[Fact]
-		public void Script_Ok()
+		[IgnoreWhenNotEnabledCreateDropTableTestingFact]
+		public async Task NoDatabbaseName_Ok()
 		{
 			// Arrange
 			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
 			try
 			{
-				string[] args = new[] { "script", "mySchemaName", "myTableName" };
+				string temp_tab_name = $"{_fixture.Options.Value.TableName}_{Guid.NewGuid():N}";
+
+				string[] args = [ "create",
+					_fixture.Options.Value.WriteConnectionString,
+					"",
+					temp_tab_name
+				];
 
 				// Act
 				int ret_val = toolApp.Run(args);
@@ -232,7 +244,39 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				Assert.Equal(0, ret_val);
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				Assert.Contains("CREATE TABLE IF NOT EXISTS `mySchemaName`.`myTableName`", output.ToString());
+				Assert.Equal("Table and index were created successfully." + Environment.NewLine, output.ToString());
+
+				await DropCreatedTable(temp_tab_name);
+			}
+			finally
+			{
+				SutTearDown(toolApp);
+			}
+		}
+
+		[Theory]
+		[InlineData("")]
+		[InlineData("mySchemaName")]
+		public void Script_Ok(string databaseSchemaName)
+		{
+			// Arrange
+			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
+			try
+			{
+				string[] args = new[] { "script", databaseSchemaName, "myTableName" };
+
+				// Act
+				int ret_val = toolApp.Run(args);
+
+				// Assert
+				Assert.Equal(0, ret_val);
+				Assert.True(output.Length > 0);
+				Assert.True(error.Length <= 0);
+
+				if(string.IsNullOrEmpty(databaseSchemaName))
+					Assert.Contains("CREATE TABLE IF NOT EXISTS `myTableName`", output.ToString());
+				else
+					Assert.Contains($"CREATE TABLE IF NOT EXISTS `{databaseSchemaName}`.`myTableName`", output.ToString());
 			}
 			finally
 			{

@@ -5,11 +5,11 @@ namespace Pomelo.Extensions.Caching.MySql
 {
 	internal class MySqlQueries
 	{
-		private const string TableInfoFormat =
-			"SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE " +
-			"FROM INFORMATION_SCHEMA.TABLES " +
-			"WHERE TABLE_SCHEMA = '{0}' " +
-			"AND TABLE_NAME = '{1}'";
+		//private const string TableInfoFormat =
+		//	"SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE " +
+		//	"FROM INFORMATION_SCHEMA.TABLES " +
+		//	"WHERE TABLE_SCHEMA = '{0}' " +
+		//	"AND TABLE_NAME = '{1}'";
 
 		private const string UpdateCacheItemFormat =
 		"UPDATE {0} " +
@@ -51,8 +51,10 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		public MySqlQueries(string schemaName, string tableName)
 		{
-			var tableNameWithSchema = string.Format(
-				"{0}.{1}", EscapeIdentifier(DelimitIdentifier(schemaName)), EscapeIdentifier(DelimitIdentifier(tableName)));
+			var tableNameWithSchema = string.Format("{0}{1}",
+				(string.IsNullOrEmpty(schemaName) ? "" : EscapeIdentifier(DelimitIdentifier(schemaName)) + '.'),
+				EscapeIdentifier(DelimitIdentifier(tableName))
+			);
 
 			// when retrieving an item, we do an UPDATE first and then a SELECT
 			GetCacheItem = string.Format(UpdateCacheItemFormat + GetCacheItemFormat, tableNameWithSchema);
@@ -60,10 +62,10 @@ namespace Pomelo.Extensions.Caching.MySql
 			DeleteCacheItem = string.Format(DeleteCacheItemFormat, tableNameWithSchema);
 			DeleteExpiredCacheItems = string.Format(DeleteExpiredCacheItemsFormat, tableNameWithSchema);
 			SetCacheItem = string.Format(SetCacheItemFormat, tableNameWithSchema);
-			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(schemaName), EscapeLiteral(tableName));
+			//TableInfo = string.Format(TableInfoFormat, EscapeLiteral(schemaName), EscapeLiteral(tableName));
 		}
 
-		public string TableInfo { get; }
+		//public string TableInfo { get; }
 
 		public string GetCacheItem { get; }
 

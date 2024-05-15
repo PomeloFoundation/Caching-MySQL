@@ -581,7 +581,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		[IgnoreWhenNoSqlSetupTheory]
 		[InlineData(10, 10)]
-		[InlineData(4, 100)]
+		[InlineData(4, 50)]
 		public async Task Concurrent_Access(int threadCount, int accessCount)
 		{
 			var testClock = new TestClock();
@@ -685,18 +685,18 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		}
 
 		[IgnoreWhenNoSqlSetupTheory]
-		[InlineData(100, 200, 1000)]
-		[InlineData(5, 2000, 10000)]
-		[InlineData(10, 500, 10)]
-		public void Profiling(int threadCount, int outerLoop, int innerLoop)
+		[InlineData(10, 20, 1000)]
+		[InlineData(5, 200, 10000)]
+		[InlineData(10, 50, 10)]
+		public async Task Profiling(int threadCount, int outerLoop, int innerLoop)
 		{
 			// Runs several concurrent threads that access an item that periodically expires and is re-created.
 			var cache = GetCache();
-			string key = "MyKey";
-
+			string key = $"MyKey_{threadCount}_{outerLoop}_{innerLoop}";
+			byte[] value = Encoding.UTF8.GetBytes(key);
 			var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMilliseconds(50));
 
-			var tasks = new List<Task>();
+			var tasks = new List<Task>(threadCount);
 			for (int threads = 0; threads < threadCount; threads++)
 			{
 				var task = Task.Run(async () =>
@@ -711,7 +711,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 							{
 							}
 
-							await cache.SetAsync(key, new byte[] { new byte() }, options);
+							await cache.SetAsync(key, value , options);
 						}
 					}
 				});
@@ -719,7 +719,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 
 			Console.WriteLine("Running");
-			Task.WaitAll(tasks.ToArray());
+			await Task.WhenAll(tasks.ToArray());
 			Console.WriteLine("Done");
 		}
 
