@@ -143,8 +143,6 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		[Theory]
 		[InlineData("create")]
 		[InlineData("create", "conn")]
-		[InlineData("create", "conn", "dbase")]
-		[InlineData("script", "dbase")]
 		[InlineData("script")]
 		public void NotEnoughParams(params string[] args)
 		{
@@ -173,7 +171,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
 			try
 			{
-				string[] args = new[] { "create", "conn", "database", "table" };
+				string[] args = new[] { "create", "conn", "table" , "-d", "database"};
 
 				// Act
 				int ret_val = toolApp.Run(args);
@@ -201,8 +199,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 				string[] args = new[] { "create",
 					_fixture.Options.Value.WriteConnectionString,
-					_fixture.Options.Value.SchemaName,
-					temp_tab_name
+					temp_tab_name,
+					"--databaseName", _fixture.Options.Value.SchemaName,
 				};
 
 				// Act
@@ -233,7 +231,6 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 				string[] args = [ "create",
 					_fixture.Options.Value.WriteConnectionString,
-					"",
 					temp_tab_name
 				];
 
@@ -255,15 +252,16 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		}
 
 		[Theory]
-		[InlineData("")]
-		[InlineData("mySchemaName")]
-		public void Script_Ok(string databaseSchemaName)
+		[InlineData("script myTableName")]
+		[InlineData("script myTableName -d mySchemaName")]
+		[InlineData("script myTableName --databaseName mySchemaName")]
+		public void Script_Ok(string allArgs)
 		{
 			// Arrange
 			Program toolApp = SutSetup(out StringBuilder output, out StringBuilder error);
 			try
 			{
-				string[] args = new[] { "script", databaseSchemaName, "myTableName" };
+				string[] args = allArgs.Split(' ');
 
 				// Act
 				int ret_val = toolApp.Run(args);
@@ -273,10 +271,10 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
 
-				if(string.IsNullOrEmpty(databaseSchemaName))
+				if(args.Length <= 2)
 					Assert.Contains("CREATE TABLE IF NOT EXISTS `myTableName`", output.ToString());
 				else
-					Assert.Contains($"CREATE TABLE IF NOT EXISTS `{databaseSchemaName}`.`myTableName`", output.ToString());
+					Assert.Contains($"CREATE TABLE IF NOT EXISTS `mySchemaName`.`myTableName`", output.ToString());
 			}
 			finally
 			{

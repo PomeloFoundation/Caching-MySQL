@@ -33,9 +33,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 		public MySqlQueries(string databaseName, string tableName)
 		{
 			//if (string.IsNullOrEmpty(databaseName))
-			//{
 			//	throw new ArgumentException("Database name cannot be empty or null");
-			//}
 			if (string.IsNullOrEmpty(tableName))
 			{
 				throw new ArgumentException("Table name cannot be empty or null");
