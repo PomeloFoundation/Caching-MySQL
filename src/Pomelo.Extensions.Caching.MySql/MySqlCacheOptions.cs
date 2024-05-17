@@ -72,7 +72,7 @@ namespace Pomelo.Extensions.Caching.MySql
 		{
 			get
 			{
-				//correct empty conn strings if possible more inteligently
+				//correct empty conn strings if possible more intelligently
 				WriteConnectionString = WriteConnectionString ?? ConnectionString;
 				ReadConnectionString = (ReadConnectionString ?? ConnectionString) ?? WriteConnectionString;
 

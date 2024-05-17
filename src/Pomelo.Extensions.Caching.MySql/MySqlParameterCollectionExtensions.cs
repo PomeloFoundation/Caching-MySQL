@@ -6,9 +6,6 @@ using System;
 
 namespace Pomelo.Extensions.Caching.MySql
 {
-	/// <summary>
-	/// TODO: make this class internal again
-	/// </summary>
 	internal static class MySqlParameterCollectionExtensions
     {
         // For all values where the length is less than the below value, try setting the size of the

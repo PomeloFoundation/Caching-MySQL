@@ -9,7 +9,7 @@
 	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Version>2.1.6</Version>
+    <Version>2.2.0</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Pomelo.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

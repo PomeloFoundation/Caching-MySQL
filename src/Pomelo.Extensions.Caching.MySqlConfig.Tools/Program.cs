@@ -169,12 +169,6 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 							await command.ExecuteNonQueryAsync(token);
 						}
 
-						//using (var command = new MySqlCommand(sqlQueries.CreateNonClusteredIndexOnExpirationTime,
-						//	connection, transaction))
-						//{
-						//	await command.ExecuteNonQueryAsync(token);
-						//}
-
 						transaction.Commit();
 
 						await Out.WriteLineAsync("Table and index were created successfully.");
