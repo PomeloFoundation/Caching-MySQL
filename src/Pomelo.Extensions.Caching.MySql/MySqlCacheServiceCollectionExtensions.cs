@@ -39,7 +39,6 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
 		// to enable unit testing
-		/// TODO: make this internal again
 		internal static void AddMySqlCacheServices(IServiceCollection services)
         {
             services.Add(ServiceDescriptor.Singleton<IDistributedCache, MySqlCache>());

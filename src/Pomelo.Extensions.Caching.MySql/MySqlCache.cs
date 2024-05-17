@@ -38,11 +38,11 @@ namespace Pomelo.Extensions.Caching.MySql
 					+ $" and {nameof(cacheOptions.ConnectionString)} cannot be empty or null at the same time.");
 			}
 
-			if (string.IsNullOrEmpty(cacheOptions.SchemaName))
-			{
-				throw new ArgumentException(
-					$"{nameof(cacheOptions.SchemaName)} cannot be empty or null.");
-			}
+			//if (string.IsNullOrEmpty(cacheOptions.SchemaName))
+			//{
+			//	throw new ArgumentException(
+			//		$"{nameof(cacheOptions.SchemaName)} cannot be empty or null.");
+			//}
 			if (string.IsNullOrEmpty(cacheOptions.TableName))
 			{
 				throw new ArgumentException(

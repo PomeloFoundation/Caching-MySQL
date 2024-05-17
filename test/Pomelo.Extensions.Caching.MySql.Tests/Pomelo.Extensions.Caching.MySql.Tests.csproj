@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFramework>net7.0</TargetFramework>
+	  <TargetFramework>net8.0</TargetFramework>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	  <AssemblyName>Pomelo.Extensions.Caching.MySql.Tests</AssemblyName>
 	  <PackageId>Pomelo.Extensions.Caching.MySql.Tests</PackageId>
@@ -9,7 +9,7 @@
 	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Version>2.1.3</Version>
+    <Version>2.2.0</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Pomelo.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -24,17 +24,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.6.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.4">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="xunit" Version="2.8.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="Moq" Version="4.20.69" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Moq" Version="4.20.70" />
   </ItemGroup>
   
 </Project>

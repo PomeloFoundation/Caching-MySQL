@@ -30,8 +30,10 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			Assert.Equal(ServiceLifetime.Singleton, serviceDescriptor.Lifetime);
 		}
 
-		[Fact]
-		public void AddDistributedSqlServerCache_ReplacesPreviouslyUserRegisteredServices()
+		[Theory]
+		[InlineData("Fake")]
+		[InlineData(null)]
+		public void AddDistributedSqlServerCache_ReplacesPreviouslyUserRegisteredServices(string schemaName)
 		{
 			// Arrange
 			var services = new ServiceCollection();
@@ -42,7 +44,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			{
 				options.ReadConnectionString = "FakeRead";
 				options.WriteConnectionString = "FakeWrite";
-				options.SchemaName = "Fake";
+				if (!string.IsNullOrEmpty(schemaName))
+					options.SchemaName = "Fake";
 				options.TableName = "Fake";
 			});
 
@@ -64,8 +67,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		[InlineData("FakeReadConnStr", null, null)]
 		[InlineData(null, "FakeWriteConnStr", null)]
 		[InlineData(null, null, "FakeConnStr")]
-		public void AddDistributedSqlServerCache_VariousConnectionStrings(string readConnectionString, string writeConnectionString,
-			string connectionString)
+		public void AddDistributedSqlServerCache_VariousConnectionStrings(
+			string readConnectionString, string writeConnectionString, string connectionString)
 		{
 			// Arrange
 			var services = new ServiceCollection();
@@ -92,8 +95,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		[Theory]
 		[InlineData(null, null, null)]
 		[InlineData("", "", "")]
-		public async Task AddDistributedSqlServerCache_BadOrEmptyConnectionStrings(string readConnectionString, string writeConnectionString,
-			string connectionString)
+		public async Task AddDistributedSqlServerCache_BadOrEmptyConnectionStrings(
+			string readConnectionString, string writeConnectionString, string connectionString)
 		{
 			// Arrange
 			var services = new ServiceCollection();

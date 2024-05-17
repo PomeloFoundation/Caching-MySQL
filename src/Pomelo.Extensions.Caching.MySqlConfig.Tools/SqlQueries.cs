@@ -22,38 +22,31 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 				"KEY `Index_ExpiresAtTime` (`ExpiresAtTime`)" +
 			")";
 
-		//private const string CreateNonClusteredIndexOnExpirationTimeFormat
-		//	= "CREATE NONCLUSTERED INDEX Index_ExpiresAtTime ON {0}(ExpiresAtTime)";
-
 		private const string TableInfoFormat =
 			 "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE " +
 			 "FROM INFORMATION_SCHEMA.TABLES " +
-			 "WHERE TABLE_SCHEMA = '{0}' " +
-			 "AND TABLE_NAME = '{1}'";
+			 "WHERE TABLE_NAME = '{0}' ";
 
 		public MySqlQueries(string databaseName, string tableName)
 		{
-			if (string.IsNullOrEmpty(databaseName))
-			{
-				throw new ArgumentException("Database name cannot be empty or null");
-			}
+			//if (string.IsNullOrEmpty(databaseName))
+			//	throw new ArgumentException("Database name cannot be empty or null");
 			if (string.IsNullOrEmpty(tableName))
 			{
 				throw new ArgumentException("Table name cannot be empty or null");
 			}
 
-			var tableNameWithDatabase = string.Format(
-				"{0}.{1}", DelimitIdentifier(databaseName), DelimitIdentifier(tableName));
+			var tableNameWithDatabase = string.Format("{0}{1}",
+				(string.IsNullOrEmpty(databaseName) ? "" : DelimitIdentifier(databaseName) + '.'),
+				DelimitIdentifier(tableName)
+				);
+
 			CreateTable = string.Format(CreateTableFormat, tableNameWithDatabase);
-			//CreateNonClusteredIndexOnExpirationTime = string.Format(
-			//	CreateNonClusteredIndexOnExpirationTimeFormat,
-			//	tableNameWithDatabase);
-			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(databaseName), EscapeLiteral(tableName));
+			TableInfo = string.Format(TableInfoFormat, EscapeLiteral(tableName)) + 
+				(string.IsNullOrEmpty(databaseName) ? "" : $"AND TABLE_SCHEMA = '{EscapeLiteral(databaseName)}'");
 		}
 
 		public string CreateTable { get; }
-
-		//public string CreateNonClusteredIndexOnExpirationTime { get; }
 
 		public string TableInfo { get; }
 

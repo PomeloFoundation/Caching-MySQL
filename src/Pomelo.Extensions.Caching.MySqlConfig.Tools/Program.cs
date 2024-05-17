@@ -63,21 +63,21 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				cliApp.Command("create", command =>
 				{
-					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
 					command.Out = Out;
 
 					command.Description = description;
 					var connectionStringArg = command.Argument(
 						"[connectionString]",
 						"The connection string to connect to the database.");
-					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
 					command.OnExecute(async () =>
 					{
 						if (string.IsNullOrEmpty(connectionStringArg.Value)
-							|| string.IsNullOrEmpty(databaseNameArg.Value)
 							|| string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
@@ -86,7 +86,7 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						}
 
 						_connectionString = connectionStringArg.Value;
-						_databaseName = databaseNameArg.Value;
+						_databaseName = databaseNameOpt.Value();
 						_tableName = tableNameArg.Value;
 
 						return await CreateTableAndIndexes();
@@ -95,25 +95,25 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 
 				cliApp.Command("script", command =>
 				{
-					command.Error = Error;//internal command Out/Erro are not yet changed, possible shortcomming
+					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
 					command.Out = Out;
 
 					command.Description = "Generate creation script";
-					var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
+					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
 					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
 					command.HelpOption("-?|-h|--help");
 
 					command.OnExecute(async () =>
 					{
-						if (string.IsNullOrEmpty(databaseNameArg.Value)
-							|| string.IsNullOrEmpty(tableNameArg.Value))
+						if (string.IsNullOrEmpty(tableNameArg.Value))
 						{
 							await Error.WriteLineAsync("Invalid input");
 							cliApp.ShowHelp(command.Name);
 							return 2;
 						}
 
-						_databaseName = databaseNameArg.Value;
+						_databaseName = databaseNameOpt.Value();
 						_tableName = tableNameArg.Value;
 
 						return await GenerateScript();
@@ -168,12 +168,6 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 						{
 							await command.ExecuteNonQueryAsync(token);
 						}
-
-						//using (var command = new MySqlCommand(sqlQueries.CreateNonClusteredIndexOnExpirationTime,
-						//	connection, transaction))
-						//{
-						//	await command.ExecuteNonQueryAsync(token);
-						//}
 
 						transaction.Commit();
 

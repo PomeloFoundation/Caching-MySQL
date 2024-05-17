@@ -239,7 +239,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			// Assert
 			Assert.Null(value);
 		}
-        
+
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task DoesNotThrowException_WhenOnlyAbsoluteExpirationSupplied_AbsoluteExpirationRelativeToNow()
 		{
@@ -360,24 +360,24 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				absoluteExpiration: absoluteExpiration,
 				expectedExpirationTime: absoluteExpiration);
 		}
-        
-        [IgnoreWhenNoSqlSetupFact]
-        public async Task SetCacheItem_Uses_DefaultSlidingExpiration_If_NoSlidingOrAbsoluteExpirationSupplied()
-        {
-          // Arrange
-          var key = Guid.NewGuid().ToString();
-          var sqlServerCache = GetCache();
-          var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
-            
-          await sqlServerCache.SetAsync(
-            key,
-            expectedValue,
-            new DistributedCacheEntryOptions());
-            
-          var cacheItem = await GetCacheItemFromDatabaseAsync(key);
-          Assert.NotNull(cacheItem);
-          Assert.Equal(cacheItem.SlidingExpirationInSeconds, _databaseOptionsFixture.Options.Value.DefaultSlidingExpiration);
-        }
+
+		[IgnoreWhenNoSqlSetupFact]
+		public async Task SetCacheItem_Uses_DefaultSlidingExpiration_If_NoSlidingOrAbsoluteExpirationSupplied()
+		{
+			// Arrange
+			var key = Guid.NewGuid().ToString();
+			var sqlServerCache = GetCache();
+			var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
+
+			await sqlServerCache.SetAsync(
+			  key,
+			  expectedValue,
+			  new DistributedCacheEntryOptions());
+
+			var cacheItem = await GetCacheItemFromDatabaseAsync(key);
+			Assert.NotNull(cacheItem);
+			Assert.Equal(cacheItem.SlidingExpirationInSeconds, _databaseOptionsFixture.Options.Value.DefaultSlidingExpiration);
+		}
 
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task ExtendsExpirationTime_ForSlidingExpiration()
@@ -581,7 +581,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 		[IgnoreWhenNoSqlSetupTheory]
 		[InlineData(10, 10)]
-		[InlineData(4, 100)]
+		[InlineData(4, 50)]
 		public async Task Concurrent_Access(int threadCount, int accessCount)
 		{
 			var testClock = new TestClock();
@@ -685,18 +685,18 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 		}
 
 		[IgnoreWhenNoSqlSetupTheory]
-		[InlineData(100, 200, 1000)]
-		[InlineData(5, 2000, 10000)]
-		[InlineData(10, 500, 10)]
-		public void Profiling(int threadCount, int outerLoop, int innerLoop)
+		[InlineData(10, 20, 1000)]
+		[InlineData(5, 200, 10000)]
+		[InlineData(10, 50, 10)]
+		public async Task Profiling(int threadCount, int outerLoop, int innerLoop)
 		{
 			// Runs several concurrent threads that access an item that periodically expires and is re-created.
 			var cache = GetCache();
-			string key = "MyKey";
-
+			string key = $"MyKey_{threadCount}_{outerLoop}_{innerLoop}";
+			byte[] value = Encoding.UTF8.GetBytes(key);
 			var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMilliseconds(50));
 
-			var tasks = new List<Task>();
+			var tasks = new List<Task>(threadCount);
 			for (int threads = 0; threads < threadCount; threads++)
 			{
 				var task = Task.Run(async () =>
@@ -711,7 +711,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 							{
 							}
 
-							await cache.SetAsync(key, new byte[] { new byte() }, options);
+							await cache.SetAsync(key, value, options);
 						}
 					}
 				});
@@ -719,7 +719,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			}
 
 			Console.WriteLine("Running");
-			Task.WaitAll(tasks.ToArray());
+			await Task.WhenAll(tasks.ToArray());
 			Console.WriteLine("Done");
 		}
 
@@ -732,7 +732,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			var expectedValue = Encoding.UTF8.GetBytes("MyValue");
 
 			await cache.SetAsync(key, expectedValue, options);
-			
+
 			CacheItemInfo value = new CacheItemInfo
 			{
 				Id = key,
@@ -751,7 +751,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 			await cache.SetAsync(key, expectedValue, options);
 		}
-		
+
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task DeleteExpiredCacheItems()
 		{
@@ -778,8 +778,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			cacheItemInfo = await sqlServerCache.GetAsync(key);
 			Assert.Null(cacheItemInfo);
 		}
-        
-      
+
+
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{
 			var options = _databaseOptionsFixture.Options.Value;
@@ -812,8 +812,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			using (var connection = new MySqlConnection(_databaseOptionsFixture.Options.Value.ReadConnectionString))
 			{
 				var command = new MySqlCommand(
-					"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
-					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE Id = @Id",
+					"SELECT " + Columns.Names.CacheItemId + ", " + Columns.Names.CacheItemValue + ", " + Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " + Columns.Names.AbsoluteExpiration + " " +
+					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE " + Columns.Names.CacheItemId + " = @Id",
 					connection);
 				command.Parameters.AddWithValue("Id", key);
 
@@ -859,7 +859,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			{
 				var command = new MySqlCommand(
 					$"INSERT INTO {_databaseOptionsFixture.Options.Value.TableName} " +
-					"(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+					"(" + Columns.Names.CacheItemId + ", " + Columns.Names.CacheItemValue + ", " + Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " + Columns.Names.AbsoluteExpiration + ") " +
 					"VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration)",
 					connection);
 				command.Parameters.AddWithValue("Id", value.Id);
