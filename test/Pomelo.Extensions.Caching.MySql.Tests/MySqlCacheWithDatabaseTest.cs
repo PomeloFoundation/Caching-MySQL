@@ -239,7 +239,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			// Assert
 			Assert.Null(value);
 		}
-        
+
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task DoesNotThrowException_WhenOnlyAbsoluteExpirationSupplied_AbsoluteExpirationRelativeToNow()
 		{
@@ -360,24 +360,24 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				absoluteExpiration: absoluteExpiration,
 				expectedExpirationTime: absoluteExpiration);
 		}
-        
-        [IgnoreWhenNoSqlSetupFact]
-        public async Task SetCacheItem_Uses_DefaultSlidingExpiration_If_NoSlidingOrAbsoluteExpirationSupplied()
-        {
-          // Arrange
-          var key = Guid.NewGuid().ToString();
-          var sqlServerCache = GetCache();
-          var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
-            
-          await sqlServerCache.SetAsync(
-            key,
-            expectedValue,
-            new DistributedCacheEntryOptions());
-            
-          var cacheItem = await GetCacheItemFromDatabaseAsync(key);
-          Assert.NotNull(cacheItem);
-          Assert.Equal(cacheItem.SlidingExpirationInSeconds, _databaseOptionsFixture.Options.Value.DefaultSlidingExpiration);
-        }
+
+		[IgnoreWhenNoSqlSetupFact]
+		public async Task SetCacheItem_Uses_DefaultSlidingExpiration_If_NoSlidingOrAbsoluteExpirationSupplied()
+		{
+			// Arrange
+			var key = Guid.NewGuid().ToString();
+			var sqlServerCache = GetCache();
+			var expectedValue = Encoding.UTF8.GetBytes("Hello, World!");
+
+			await sqlServerCache.SetAsync(
+			  key,
+			  expectedValue,
+			  new DistributedCacheEntryOptions());
+
+			var cacheItem = await GetCacheItemFromDatabaseAsync(key);
+			Assert.NotNull(cacheItem);
+			Assert.Equal(cacheItem.SlidingExpirationInSeconds, _databaseOptionsFixture.Options.Value.DefaultSlidingExpiration);
+		}
 
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task ExtendsExpirationTime_ForSlidingExpiration()
@@ -711,7 +711,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 							{
 							}
 
-							await cache.SetAsync(key, value , options);
+							await cache.SetAsync(key, value, options);
 						}
 					}
 				});
@@ -732,7 +732,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			var expectedValue = Encoding.UTF8.GetBytes("MyValue");
 
 			await cache.SetAsync(key, expectedValue, options);
-			
+
 			CacheItemInfo value = new CacheItemInfo
 			{
 				Id = key,
@@ -751,7 +751,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 
 			await cache.SetAsync(key, expectedValue, options);
 		}
-		
+
 		[IgnoreWhenNoSqlSetupFact]
 		public async Task DeleteExpiredCacheItems()
 		{
@@ -778,8 +778,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			cacheItemInfo = await sqlServerCache.GetAsync(key);
 			Assert.Null(cacheItemInfo);
 		}
-        
-      
+
+
 		private MySqlCache GetCache(ISystemClock testClock = null)
 		{
 			var options = _databaseOptionsFixture.Options.Value;
@@ -812,8 +812,8 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			using (var connection = new MySqlConnection(_databaseOptionsFixture.Options.Value.ReadConnectionString))
 			{
 				var command = new MySqlCommand(
-					"SELECT Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration " +
-					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE Id = @Id",
+					"SELECT " + Columns.Names.CacheItemId + ", " + Columns.Names.CacheItemValue + ", " + Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " + Columns.Names.AbsoluteExpiration + " " +
+					$"FROM {_databaseOptionsFixture.Options.Value.TableName} WHERE " + Columns.Names.CacheItemId + " = @Id",
 					connection);
 				command.Parameters.AddWithValue("Id", key);
 
@@ -859,7 +859,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 			{
 				var command = new MySqlCommand(
 					$"INSERT INTO {_databaseOptionsFixture.Options.Value.TableName} " +
-					"(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+					"(" + Columns.Names.CacheItemId + ", " + Columns.Names.CacheItemValue + ", " + Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " + Columns.Names.AbsoluteExpiration + ") " +
 					"VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration)",
 					connection);
 				command.Parameters.AddWithValue("Id", value.Id);

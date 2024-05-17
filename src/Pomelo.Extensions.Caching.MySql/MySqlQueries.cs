@@ -13,21 +13,21 @@ namespace Pomelo.Extensions.Caching.MySql
 
 		private const string UpdateCacheItemFormat =
 		"UPDATE {0} " +
-		"SET ExpiresAtTime = " +
+		"SET " + Columns.Names.ExpiresAtTime + " = " +
 			"(CASE " +
-				"WHEN TIME_TO_SEC(TIMEDIFF(AbsoluteExpiration, @UtcNow)) <= SlidingExpirationInSeconds " +
-					"THEN AbsoluteExpiration " +
+				"WHEN TIME_TO_SEC(TIMEDIFF(" + Columns.Names.AbsoluteExpiration + ", @UtcNow)) <= " + Columns.Names.SlidingExpirationInSeconds + " " +
+					"THEN " + Columns.Names.AbsoluteExpiration + " " +
 				"ELSE " +
-					"DATE_ADD(@UtcNow, INTERVAL SlidingExpirationInSeconds SECOND) " +
+					"DATE_ADD(@UtcNow, INTERVAL " + Columns.Names.SlidingExpirationInSeconds + " SECOND) " +
 			"END) " +
-		"WHERE Id = @Id " +
-		"AND @UtcNow <= ExpiresAtTime " +
-		"AND SlidingExpirationInSeconds IS NOT NULL " +
-		"AND (AbsoluteExpiration IS NULL OR AbsoluteExpiration <> ExpiresAtTime);";
+		"WHERE " + Columns.Names.CacheItemId + " = @Id " +
+		"AND @UtcNow <= " + Columns.Names.ExpiresAtTime + " " +
+		"AND " + Columns.Names.SlidingExpirationInSeconds + " IS NOT NULL " +
+		"AND (" + Columns.Names.AbsoluteExpiration + " IS NULL OR " + Columns.Names.AbsoluteExpiration + " <> " + Columns.Names.ExpiresAtTime + ");";
 
 		private const string GetCacheItemFormat =
-			"SELECT Id, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration, Value " +
-			"FROM {0} WHERE Id = @Id AND @UtcNow <= ExpiresAtTime;";
+			"SELECT Id, " + Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " + Columns.Names.AbsoluteExpiration + ", " + Columns.Names.CacheItemValue + " " +
+			"FROM {0} WHERE " + Columns.Names.CacheItemId + " = @Id AND @UtcNow <= " + Columns.Names.ExpiresAtTime + ";";
 
 		private const string SetCacheItemFormat =
 			"SET @ExpiresAtTime = " +
@@ -37,17 +37,18 @@ namespace Pomelo.Extensions.Caching.MySql
 					"ELSE " +
 						"DATE_ADD(@UtcNow, INTERVAL @SlidingExpirationInSeconds SECOND) " +
 			"END);" +
-			 "INSERT INTO {0} " +
-			 "(Id, Value, ExpiresAtTime, SlidingExpirationInSeconds, AbsoluteExpiration) " +
+			 "INSERT INTO {0} (" + Columns.Names.CacheItemId + ", " + Columns.Names.CacheItemValue + ", " +
+				Columns.Names.ExpiresAtTime + ", " + Columns.Names.SlidingExpirationInSeconds + ", " +
+				Columns.Names.AbsoluteExpiration + ") " +
 			 "VALUES (@Id, @Value, @ExpiresAtTime, @SlidingExpirationInSeconds, @AbsoluteExpiration)" +
 			" ON DUPLICATE KEY " +
-					  "UPDATE Value = @Value, ExpiresAtTime = @ExpiresAtTime," +
-					  "SlidingExpirationInSeconds = @SlidingExpirationInSeconds, AbsoluteExpiration = @AbsoluteExpiration " +
+					  "UPDATE " + Columns.Names.CacheItemValue + " = @Value, " + Columns.Names.ExpiresAtTime + " = @ExpiresAtTime," +
+					  Columns.Names.SlidingExpirationInSeconds + " = @SlidingExpirationInSeconds, " + Columns.Names.AbsoluteExpiration + " = @AbsoluteExpiration " +
 					  ";";
 
-		private const string DeleteCacheItemFormat = "DELETE FROM {0} WHERE Id = @Id";
+		private const string DeleteCacheItemFormat = "DELETE FROM {0} WHERE " + Columns.Names.CacheItemId + " = @Id";
 
-		public const string DeleteExpiredCacheItemsFormat = "DELETE FROM {0} WHERE @UtcNow > ExpiresAtTime";
+		public const string DeleteExpiredCacheItemsFormat = "DELETE FROM {0} WHERE @UtcNow > " + Columns.Names.ExpiresAtTime;
 
 		public MySqlQueries(string schemaName, string tableName)
 		{
