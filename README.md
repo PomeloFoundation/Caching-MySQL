@@ -6,9 +6,14 @@ Basing on https://learn.microsoft.com/en-us/aspnet/core/performance/caching/dist
 
 ### Distributed MySQL Server Cache
 
-The Distributed MySQL Server Cache implementation (**AddDistributedMySqlCache**) allows the distributed cache to use a MySQL Server database as its backing store. To create a MySQL Server cached item table in a MySQL Server instance, you can use the `dotnet-mysql-cache` tool. The tool creates a table with the name and schema that you specify.
+The Distributed MySQL Server Cache implementation (**AddDistributedMySqlCache**) allows the distributed cache to use a MySQL Server database as its backing store. To create a MySQL Server cached item table in a MySQL Server instance, you can use the [dotnet-mysql-cache](https://www.nuget.org/packages/Pomelo.Extensions.Caching.MySqlConfig.Tools) tool. The tool creates a table with the name and schema that you specify.
 
-Create a table in MySQL Server by running the `dotnet mysql-cache create` command. Provide the MySQL Server connection string, instance (for example `server=192.169.0.1`), table name (for example, `NewTableName`) and optional database (for example, `MyDatabaseName`):
+CLI tool (globally) can be done with
+```
+dotnet tool install --global Pomelo.Extensions.Caching.MySqlConfig.Tools
+```
+
+Now, create a table in MySQL Server by running the `dotnet mysql-cache create` command. Provide the MySQL Server connection string, instance (for example `server=192.169.0.1`), table name (for example, `NewTableName`) and optional database (for example, `MyDatabaseName`):
 
 ```dotnetcli
 dotnet mysql-cache create "server=192.169.0.1;user id=userName;password=P4ssword123!;port=3306;database=MyDatabaseName;Allow User Variables=True" "NewTableName" --databaseName "MyDatabaseName"
