@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Command line tool to create tables and indexes in a MySql Server database for distributed caching.</Description>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
