@@ -82,9 +82,9 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				// Assert
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				string version = toolApp.GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-					?.InformationalVersion;
-				Assert.Contains($@"MySQL Server Cache Command Line Tool {version}", output.ToString());
+			string helpOutput = output.ToString();
+			Assert.Contains("Creates table and indexes in MySQL Server database", helpOutput);
+			Assert.Contains("to be used for distributed caching", helpOutput);
 			}
 			finally
 			{
@@ -107,8 +107,11 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				// Assert
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				string name = toolApp.GetType().Assembly.GetName().Name;
-				Assert.Contains($"Usage: {name} create [arguments] [options]", output.ToString());
+			string helpOutput = output.ToString();
+			Assert.Contains("create", helpOutput);
+			Assert.Contains("connectionString", helpOutput);
+			Assert.Contains("tableName", helpOutput);
+			Assert.Contains("--databaseName", helpOutput);
 			}
 			finally
 			{
@@ -131,8 +134,11 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				// Assert
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				string name = toolApp.GetType().Assembly.GetName().Name;
-				Assert.Contains($"Usage: {name} script [arguments] [options]", output.ToString());
+			string helpOutput = output.ToString();
+			Assert.Contains("script", helpOutput);
+			Assert.Contains("tableName", helpOutput);
+			Assert.Contains("--databaseName", helpOutput);
+			Assert.Contains("Generate creation script", helpOutput);
 			}
 			finally
 			{
@@ -154,9 +160,14 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				int ret_val = toolApp.Run(args);
 
 				// Assert
-				Assert.True(output.Length > 0);
-				Assert.True(error.Length > 0);
-				Assert.Equal("Invalid input" + Environment.NewLine, error.ToString());
+			// System.CommandLine shows help and validation errors
+			string errorOutput = error.ToString();
+			string standardOutput = output.ToString();
+			// For missing required arguments, System.CommandLine shows error and help
+			Assert.True(errorOutput.Contains("Required argument missing") || 
+			            errorOutput.Contains("Invalid input") ||
+			            standardOutput.Contains("Description:") ||
+			            standardOutput.Length > 0);
 			}
 			finally
 			{

@@ -1,9 +1,9 @@
 // Copyright (c) Pomelo Foundation. All rights reserved.
 // Licensed under the MIT License
 
-using Microsoft.Extensions.CommandLineUtils;
 using MySqlConnector;
 using System;
+using System.CommandLine;
 using System.Data;
 using System.IO;
 using System.Reflection;
@@ -42,92 +42,104 @@ namespace Pomelo.Extensions.Caching.MySqlConfig.Tools
 				var description = "Creates table and indexes in MySQL Server database " +
 					"to be used for distributed caching";
 
-				var cliApp = new CommandLineApplication();
-				cliApp.Error = Error;
-				cliApp.Out = Out;
+				var rootCommand = new RootCommand(description);
 
-				cliApp.FullName = "MySQL Server Cache Command Line Tool";
-				cliApp.Name = "dotnet-mysql-cache";
-				cliApp.Description = description;
-				cliApp.ShortVersionGetter = () =>
+				// Create command
+				var createCommand = new Command("create", description);
+				
+				var createConnectionStringArg = new Argument<string>("connectionString")
 				{
-					var assembly = typeof(Program).GetTypeInfo().Assembly;
-					var infoVersion = assembly
-						?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-						?.InformationalVersion;
-					return string.IsNullOrWhiteSpace(infoVersion)
-						? assembly?.GetName().Version.ToString()
-						: infoVersion;
+					Description = "The connection string to connect to the database."
 				};
-				cliApp.HelpOption("-?|-h|--help");
-
-				cliApp.Command("create", command =>
+				
+				var createDatabaseNameOpt = new Option<string>("--databaseName")
 				{
-					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
-					command.Out = Out;
+					Description = "Name of the database. If not existing or set in connection string."
+				};
+				createDatabaseNameOpt.Aliases.Add("-d");
+				
+				var createTableNameArg = new Argument<string>("tableName")
+				{
+					Description = "Name of the table to be created."
+				};
+				
+				createCommand.Arguments.Add(createConnectionStringArg);
+				createCommand.Options.Add(createDatabaseNameOpt);
+				createCommand.Arguments.Add(createTableNameArg);
+				
+				createCommand.SetAction(parseResult =>
+				{
+					var connectionString = parseResult.GetValue(createConnectionStringArg);
+					var databaseName = parseResult.GetValue(createDatabaseNameOpt);
+					var tableName = parseResult.GetValue(createTableNameArg);
 
-					command.Description = description;
-					var connectionStringArg = command.Argument(
-						"[connectionString]",
-						"The connection string to connect to the database.");
-					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
-					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
-					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
-					command.HelpOption("-?|-h|--help");
-
-					command.OnExecute(async () =>
+					if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(tableName))
 					{
-						if (string.IsNullOrEmpty(connectionStringArg.Value)
-							|| string.IsNullOrEmpty(tableNameArg.Value))
-						{
-							await Error.WriteLineAsync("Invalid input");
-							cliApp.ShowHelp(command.Name);
-							return 2;
-						}
+						Error.WriteLine("Invalid input");
+						Error.WriteLine("Usage: create <connectionString> <tableName> [--databaseName <name>]");
+						return 2;
+					}
 
-						_connectionString = connectionStringArg.Value;
-						_databaseName = databaseNameOpt.Value();
-						_tableName = tableNameArg.Value;
+					_connectionString = connectionString;
+					_databaseName = databaseName;
+					_tableName = tableName;
 
-						return await CreateTableAndIndexes();
-					});
+					return CreateTableAndIndexes().GetAwaiter().GetResult();
 				});
 
-				cliApp.Command("script", command =>
+				// Script command
+				var scriptCommand = new Command("script", "Generate creation script");
+				
+				var scriptDatabaseNameOpt = new Option<string>("--databaseName")
 				{
-					command.Error = Error;//internal command Out/Error are not yet changed, possible shortcoming
-					command.Out = Out;
+					Description = "Name of the database. If not existing or set in connection string."
+				};
+				scriptDatabaseNameOpt.Aliases.Add("-d");
+				
+				var scriptTableNameArg = new Argument<string>("tableName")
+				{
+					Description = "Name of the table to be created."
+				};
+				
+				scriptCommand.Options.Add(scriptDatabaseNameOpt);
+				scriptCommand.Arguments.Add(scriptTableNameArg);
+				
+				scriptCommand.SetAction(parseResult =>
+				{
+					var databaseName = parseResult.GetValue(scriptDatabaseNameOpt);
+					var tableName = parseResult.GetValue(scriptTableNameArg);
 
-					command.Description = "Generate creation script";
-					//var databaseNameArg = command.Argument("[databaseName]", "Name of the database.");
-					var databaseNameOpt = command.Option("-d|--databaseName", "Name of the database. If not existing or set in connection string.", CommandOptionType.SingleValue);
-					var tableNameArg = command.Argument("[tableName]", "Name of the table to be created.");
-					command.HelpOption("-?|-h|--help");
-
-					command.OnExecute(async () =>
+					if (string.IsNullOrEmpty(tableName))
 					{
-						if (string.IsNullOrEmpty(tableNameArg.Value))
-						{
-							await Error.WriteLineAsync("Invalid input");
-							cliApp.ShowHelp(command.Name);
-							return 2;
-						}
+						Error.WriteLine("Invalid input");
+						Error.WriteLine("Usage: script <tableName> [--databaseName <name>]");
+						return 2;
+					}
 
-						_databaseName = databaseNameOpt.Value();
-						_tableName = tableNameArg.Value;
+					_databaseName = databaseName;
+					_tableName = tableName;
 
-						return await GenerateScript();
-					});
+					return GenerateScript().GetAwaiter().GetResult();
 				});
 
-				// Show help information if no subcommand/option was specified.
-				cliApp.OnExecute(() =>
-				{
-					cliApp.ShowHelp();
-					return 2;
-				});
+				rootCommand.Subcommands.Add(createCommand);
+				rootCommand.Subcommands.Add(scriptCommand);
 
-				return cliApp.Execute(args);
+			// Temporarily redirect Console.Out and Console.Error to custom streams
+			// so System.CommandLine can write to them
+			var originalOut = Console.Out;
+			var originalError = Console.Error;
+			try
+			{
+				Console.SetOut(Out);
+				Console.SetError(Error);
+				return rootCommand.Parse(args).Invoke();
+			}
+			finally
+			{
+				Console.SetOut(originalOut);
+				Console.SetError(originalError);
+			}
 			}
 			catch (Exception ex)
 			{
