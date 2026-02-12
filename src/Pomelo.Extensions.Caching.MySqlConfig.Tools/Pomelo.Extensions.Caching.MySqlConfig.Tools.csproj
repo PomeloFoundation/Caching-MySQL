@@ -18,10 +18,10 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>Pomelo.Extensions.Caching.MySqlConfig.Tools</RootNamespace>
-    <Version>2.2.1</Version>
+    <Version>2.3.0</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>2.2.1.0</AssemblyVersion>
+    <AssemblyVersion>2.3.0.0</AssemblyVersion>
     <IsPackable>true</IsPackable>
     <ToolCommandName>dotnet-mysql-cache</ToolCommandName>
     <PackAsTool>true</PackAsTool>
@@ -29,6 +29,7 @@
     <AssemblyOriginatorKeyFile>Pomelo.snk</AssemblyOriginatorKeyFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <UserSecretsId>ee76a3dd-dc05-4743-8599-819110cd281a</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -42,8 +43,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-    <PackageReference Include="MySqlConnector" Version="2.4.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.3" />
+    <PackageReference Include="MySqlConnector" Version="2.5.0" />
   </ItemGroup>
 
 </Project>
