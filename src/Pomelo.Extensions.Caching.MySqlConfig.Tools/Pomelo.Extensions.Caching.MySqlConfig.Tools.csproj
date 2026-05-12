@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.7" />
+    <PackageReference Include="System.CommandLine" Version="2.0.8" />
     <PackageReference Include="MySqlConnector" Version="2.5.0" />
   </ItemGroup>
 
