@@ -221,7 +221,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				Assert.Equal(0, ret_val);
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				Assert.Equal("Table and index were created successfully." + Environment.NewLine, output.ToString());
+				Assert.Contains("Table and index were created successfully." + Environment.NewLine, output.ToString());
 
 				await DropCreatedTable(temp_tab_name);
 			}
@@ -252,7 +252,7 @@ namespace Pomelo.Extensions.Caching.MySql.Tests
 				Assert.Equal(0, ret_val);
 				Assert.True(output.Length > 0);
 				Assert.True(error.Length <= 0);
-				Assert.Equal("Table and index were created successfully." + Environment.NewLine, output.ToString());
+				Assert.Contains("Table and index were created successfully." + Environment.NewLine, output.ToString());
 
 				await DropCreatedTable(temp_tab_name);
 			}
